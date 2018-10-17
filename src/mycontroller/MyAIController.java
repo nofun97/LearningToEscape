@@ -1,6 +1,5 @@
 package mycontroller;
 
-import com.sun.xml.internal.bind.v2.TODO;
 import controller.CarController;
 import utilities.Coordinate;
 import world.Car;
@@ -10,11 +9,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.HashMap;
-import controller.CarController;
-import tiles.HealthTrap;
-import tiles.LavaTrap;
+
 import tiles.MapTile;
-import world.WorldSpatial;
 
 
 public class MyAIController extends CarController{
@@ -24,6 +20,7 @@ public class MyAIController extends CarController{
 	// to store how many keys already got
     private ArrayList<Coordinate> keyList = new ArrayList<>();
     private HashMap<Coordinate, MapTile> map = super.getMap();
+    private PathFinder pathFinder;
     // How many minimum units the wall is away from the player.
     private int wallSensitivity = 1;
 
@@ -33,6 +30,7 @@ public class MyAIController extends CarController{
 	public MyAIController(Car car) {
 		super(car);
         route = new Route(map, super.getPosition());
+        pathFinder = new BreadthFirstSearchPathFinding(route);
 	}
 
 	/**
@@ -42,16 +40,15 @@ public class MyAIController extends CarController{
     */
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
 
 		if (commandsQueue.isEmpty()){
-			Coordinate x = getCurrentCooordinate();
-			ArrayList<Coordinate> coordinates = new ArrayList<>();
-			coordinates.add(new Coordinate(x.x + 1, x.y));
-			coordinates.add(new Coordinate(x.x + 2, x.y));
-			coordinates.add(new Coordinate(x.x + 2, x.y-1));
-			coordinates.add(new Coordinate(x.x + 3, x.y-1));
-			setCommandSequence(coordinates);
+			Coordinate x = getCurrentCoordinate();
+			Coordinate y = new Coordinate(x.x + 3, x.y - 1);
+            List<Coordinate> z = pathFinder.findBestPath(x, y, getOrientation());
+//            for (Coordinate a:z) {
+//                System.out.println(a.toString());
+//            }
+			setCommandSequence(z);
 		}
 
 		Commands nextCommand = commandsQueue.poll();
@@ -78,7 +75,7 @@ public class MyAIController extends CarController{
 	}
 
 	public void setCommandSequence(List<Coordinate> coordinates){
-		Coordinate currentCoordinate = getCurrentCooordinate();
+		Coordinate currentCoordinate = getCurrentCoordinate();
 		WorldSpatial.Direction currentOrientation = getOrientation();
 		final int[] RIGHT_DIRECTION = {1,0};
 		final int[] LEFT_DIRECTION = {-1,0};
@@ -285,7 +282,7 @@ public class MyAIController extends CarController{
 
 	}
 
-	private Coordinate getCurrentCooordinate() {
+	private Coordinate getCurrentCoordinate() {
 		List<Integer> coordinateString =
 				Arrays.stream(getPosition().split(","))
 						.map(Integer::parseInt)

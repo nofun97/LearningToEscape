@@ -8,9 +8,10 @@ import world.World;
 import world.WorldSpatial;
 
 public class Route {
-    public int[][] gridMap = new int[World.MAP_WIDTH][World.MAP_HEIGHT];
+    public int[][] gridMap = new int[World.MAP_HEIGHT][World.MAP_WIDTH];
     private HashMap<Coordinate,MapTile> map;
     private Coordinate exit;
+    private PathFinder pathFinder;
     private static final String LAVA = "lava";
     private static final String HEALTH = "health";
     public static final int WALL = -1;
@@ -23,6 +24,7 @@ public class Route {
         int initCarX = Integer.parseInt(posStr[0]);
         int initCarY = Integer.parseInt(posStr[1]);
         this.map = map;
+//        buildMap();
     }
 
     // Determines whether the give coordinate is a lava tile.
@@ -56,7 +58,7 @@ public class Route {
 
             // if current loc is WALL, then mark this grid as WALL
             if(currLoc.isType(MapTile.Type.WALL)){
-                gridMap[coord.x][coord.y] = WALL;
+                gridMap[coord.y][coord.x] = WALL;
             }
 
             // do same thing with EXIT
@@ -64,9 +66,10 @@ public class Route {
                 this.exit = coord;
             }
             else{
-                gridMap[coord.x][coord.y] = TRAP_OR_ROAD;
+                gridMap[coord.y][coord.x] = TRAP_OR_ROAD;
             }
         }
+
     }
 
     // check if there is a wall on which side.
