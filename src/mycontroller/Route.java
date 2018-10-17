@@ -1,4 +1,5 @@
 package mycontroller;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import tiles.MapTile;
@@ -81,7 +82,7 @@ public class Route {
         return true;
     }
 
-    // update the map based on the location
+    // update the map based on the location (useful for deciding which direction to go)
     public void updateMap(int x, int y, int value){
         this.buildMap();
         if(!withinMap(x, y, gridMap) || gridMap[x][y] == WALL || gridMap[x][y] < value){
@@ -135,5 +136,45 @@ public class Route {
                 break;
         }
         return 0;
+    }
+
+    // based on the lowest value, choose the next direction of the car
+    public WorldSpatial.Direction nextDirection(int carX, int carY){
+        // use array list to store four coordinates surrounding the car
+        ArrayList<Coordinate> surrCoord = new ArrayList<>();
+        // add the current position's surrounding coordinates
+        surrCoord.add(new Coordinate(carX-1, carY));
+        surrCoord.add(new Coordinate(carX+1, carY));
+        surrCoord.add(new Coordinate(carX, carY-1));
+        surrCoord.add(new Coordinate(carX, carY+1));
+
+        // set a maximum value for comparison
+        int value = Integer.MAX_VALUE;
+        Coordinate lowestCoord = null;
+
+        // find the minimum value of surrounding grid, this grid is the one which
+        // hasn't explored or less explore.
+        for(Coordinate coord : surrCoord){
+            int current = gridMap[coord.x][coord.y];
+            if(current < value && current != WALL){
+                // then update
+                value = current;
+                lowestCoord = new Coordinate(coord.x, coord.y);
+            }
+        }
+        // check which direction to go next
+        if(lowestCoord.x < carX){
+            return WorldSpatial.Direction.WEST;
+        }
+        else if(lowestCoord.x > carX){
+            return WorldSpatial.Direction.EAST;
+        }
+        else if(lowestCoord.y < carY){
+            return WorldSpatial.Direction.SOUTH;
+        }
+        else if(lowestCoord.y > carY){
+            return WorldSpatial.Direction.NORTH;
+        }
+        return null;
     }
 }
