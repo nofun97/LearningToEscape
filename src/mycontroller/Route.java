@@ -27,29 +27,30 @@ public class Route {
         buildMap();
     }
 
+    // TODO: dont think this part should be this class, but it useful
     // Determines whether the give coordinate is a lava tile.
-    public static boolean isLava(HashMap<Coordinate, MapTile> map, Coordinate coord){
-        MapTile mapTile = map.get(coord);
-        if(mapTile != null && mapTile.isType(MapTile.Type.TRAP)){
-            TrapTile trapTile = (TrapTile) mapTile;
-
-            return trapTile.getTrap().equals(LAVA);
-        }
-
-        return false;
-    }
-
-    // Determines whether the give coordinate is a health tile.
-    public static boolean isHealth(HashMap<Coordinate, MapTile> map, Coordinate coord){
-        MapTile mapTile = map.get(coord);
-        if(mapTile != null && mapTile.isType(MapTile.Type.TRAP)){
-            TrapTile trapTile = (TrapTile) mapTile;
-
-            return trapTile.getTrap().equals(HEALTH);
-        }
-
-        return false;
-    }
+//    public static boolean isLava(HashMap<Coordinate, MapTile> map, Coordinate coord){
+//        MapTile mapTile = map.get(coord);
+//        if(mapTile != null && mapTile.isType(MapTile.Type.TRAP)){
+//            TrapTile trapTile = (TrapTile) mapTile;
+//
+//            return trapTile.getTrap().equals(LAVA);
+//        }
+//
+//        return false;
+//    }
+//
+//    // Determines whether the give coordinate is a health tile.
+//    public static boolean isHealth(HashMap<Coordinate, MapTile> map, Coordinate coord){
+//        MapTile mapTile = map.get(coord);
+//        if(mapTile != null && mapTile.isType(MapTile.Type.TRAP)){
+//            TrapTile trapTile = (TrapTile) mapTile;
+//
+//            return trapTile.getTrap().equals(HEALTH);
+//        }
+//
+//        return false;
+//    }
 
     // build a new form of map to store the tile information
     public void buildMap(){
@@ -71,7 +72,7 @@ public class Route {
         }
     }
 
-    //check if the point is in the map
+    //check if the coordinate is in the map
     public boolean withinMap(int x, int y, int[][] map){
         if(x < 0 || x >= map.length){
             return false;
@@ -177,4 +178,14 @@ public class Route {
         }
         return null;
     }
+
+    // check if the current point is valid (NOVANN but how to deal with a point surrounding by WALLLLLLLLL!!!!!!!!!!!!!!!!!)
+    public boolean checkCurrCoordValid(int CarX, int CarY){
+        if(gridMap[CarX][CarY] == TRAP_OR_ROAD){
+            return true;
+        }
+        return false;
+    }
 }
+
+// TODO: one part left, how to know the search finished???

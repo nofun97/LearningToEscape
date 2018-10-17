@@ -18,6 +18,7 @@ import world.WorldSpatial;
 
 public class MyAIController extends CarController{
 	private enum Commands {FORWARD, REVERSE, LEFT, RIGHT, BRAKE};
+    private ArrayList<Coordinate> recordCoordinate = new ArrayList<>();
 	private Queue<Commands> commandsQueue = new LinkedList<>();
 	private StrategyFactory strategy = new Strategy();
 
@@ -44,6 +45,7 @@ public class MyAIController extends CarController{
     */
 	@Override
 	public void update() {
+
 		if (commandsQueue.isEmpty()){
 			Coordinate coord = getCurrentCoordinate();
 			ArrayList<Coordinate> coordinates = new ArrayList<>();
@@ -187,18 +189,30 @@ public class MyAIController extends CarController{
 
         commandsQueue.add(Commands.BRAKE);
     }
+
+    // LOOK AT THISSSSSS!!!!!!!! VERY IMPORTANT!!!!!
     // update the view of the car (replace the normal tile with trap tile if given)
     private void updateMap() {
         HashMap<Coordinate, MapTile> currentView = getView();
         MapTile newTile, currentTile;
 
-        for(Coordinate c : currentView.keySet()) {
-            newTile = currentView.get(c);
-            Coordinate tmp = new Coordinate(c.x, c.y);
-            if((currentTile = map.get(tmp)) != null && newTile.getType() != currentTile.getType()) {
+        for(Coordinate coord : currentView.keySet()) {
+            newTile = currentView.get(coord);
+            Coordinate tmp = new Coordinate(coord.x, coord.y);
+            currentTile = map.get(tmp);
+            if(currentTile != null && newTile.getType() != currentTile.getType()
+                    & !recordCoordinate.contains(coord)) {
+                //TODO: WE NEED TO DO something to handle the trap, (avoid, gotKey or goToHeal?????????)then mark it as
+                //TODO: handled, no need to handle this point agiannnnnn.
                 map.put(tmp, newTile);
+                recordCoordinate.add(coord);
             }
         }
+    }
+
+    public void handleTheTrap(Coordinate coord, MapTile mapTile){
+        //TODO: if there is a LAVA, based on the condition(do we have any keys?)
+        //TODO: I think here need to implement strategy
     }
 
     /**
@@ -265,19 +279,7 @@ public class MyAIController extends CarController{
 
     }
 
-//	// explore and recover the original map based on the TRAP info received.
-//	public void exploreMap(HashMap<Coordinate, MapTile> knownMap){
-//	    for(Coordinate coord : knownMap.keySet()){
-//	        MapTile current = knownMap.get(coord);
-//	        if(current.isType(MapTile.Type.TRAP)){
-//                //TODO: DO something to handle the trap, and mark it as handled
-//            }
-//        }
-//    }
-//
-//    public void handleTheTrap(Coordinate coord, MapTile mapTile){
-//	    //TODO: if there is a LAVA, based on the condition(do we have any keys?)
-//    }
+
 
 
 	public void findBestPath(Coordinate nextDestination){
