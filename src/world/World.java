@@ -185,5 +185,20 @@ public class World {
 		}
 		return providedMapTiles;	
 	}
-	
+
+	/** NOTE: to testing the DFS implementation
+     *  NOT the Original file!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * */
+    public static HashMap<Coordinate,MapTile> getMapACTUAL(){
+        if(providedMapTiles.keySet().size() == 0){ // Lazy initialisation
+            for(Coordinate coord : mapTiles.keySet()){
+                int reverseYAxis = MAP_HEIGHT-coord.y;
+                Coordinate newCoord = new Coordinate(coord.x, reverseYAxis);
+                MapTile current = mapTiles.get(coord);
+                providedMapTiles.put(newCoord, current);
+            }
+        }
+        return providedMapTiles;
+    }
+
 }
