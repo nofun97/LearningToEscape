@@ -1,6 +1,5 @@
 package mycontroller;
 
-import com.sun.xml.internal.bind.v2.TODO;
 import controller.CarController;
 import utilities.Coordinate;
 import world.Car;
@@ -21,13 +20,16 @@ public class MyAIController extends CarController{
 	private enum Commands {FORWARD, REVERSE, LEFT, RIGHT, BRAKE};
 	private Queue<Commands> commandsQueue = new LinkedList<>();
 	private StrategyFactory strategy = new Strategy();
+
 	// to store how many keys already got
     private ArrayList<Coordinate> keyList = new ArrayList<>();
     private HashMap<Coordinate, MapTile> map = super.getMap();
+
     // How many minimum units the wall is away from the player.
     private int wallSensitivity = 1;
 
-    private boolean isFollowingWall = false; // This is set to true when the car starts sticking to a wall.
+    // This is set to true when the car starts sticking to a wall.
+    private boolean isFollowingWall = false;
     private Route route;
 
 	public MyAIController(Car car) {
@@ -42,15 +44,13 @@ public class MyAIController extends CarController{
     */
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
-
 		if (commandsQueue.isEmpty()){
-			Coordinate x = getCurrentCooordinate();
+			Coordinate coord = getCurrentCoordinate();
 			ArrayList<Coordinate> coordinates = new ArrayList<>();
-			coordinates.add(new Coordinate(x.x + 1, x.y));
-			coordinates.add(new Coordinate(x.x + 2, x.y));
-			coordinates.add(new Coordinate(x.x + 2, x.y-1));
-			coordinates.add(new Coordinate(x.x + 3, x.y-1));
+			coordinates.add(new Coordinate(coord.x + 1, coord.y));
+			coordinates.add(new Coordinate(coord.x + 2, coord.y));
+			coordinates.add(new Coordinate(coord.x + 2, coord.y-1));
+			coordinates.add(new Coordinate(coord.x + 3, coord.y-1));
 			setCommandSequence(coordinates);
 		}
 
@@ -78,7 +78,7 @@ public class MyAIController extends CarController{
 	}
 
 	public void setCommandSequence(List<Coordinate> coordinates){
-		Coordinate currentCoordinate = getCurrentCooordinate();
+		Coordinate currentCoordinate = getCurrentCoordinate();
 		WorldSpatial.Direction currentOrientation = getOrientation();
 		final int[] RIGHT_DIRECTION = {1,0};
 		final int[] LEFT_DIRECTION = {-1,0};
@@ -189,14 +189,14 @@ public class MyAIController extends CarController{
     }
     // update the view of the car (replace the normal tile with trap tile if given)
     private void updateMap() {
-        HashMap<Coordinate, MapTile> currview = getView();
-        MapTile newtile, currtile;
+        HashMap<Coordinate, MapTile> currentView = getView();
+        MapTile newTile, currentTile;
 
-        for(Coordinate c : currview.keySet()) {
-            newtile = currview.get(c);
+        for(Coordinate c : currentView.keySet()) {
+            newTile = currentView.get(c);
             Coordinate tmp = new Coordinate(c.x, c.y);
-            if((currtile = map.get(tmp)) != null && newtile.getType() != currtile.getType()) {
-                map.put(tmp, newtile);
+            if((currentTile = map.get(tmp)) != null && newTile.getType() != currentTile.getType()) {
+                map.put(tmp, newTile);
             }
         }
     }
@@ -264,7 +264,7 @@ public class MyAIController extends CarController{
         }
 
     }
-//
+
 //	// explore and recover the original map based on the TRAP info received.
 //	public void exploreMap(HashMap<Coordinate, MapTile> knownMap){
 //	    for(Coordinate coord : knownMap.keySet()){
@@ -285,7 +285,7 @@ public class MyAIController extends CarController{
 
 	}
 
-	private Coordinate getCurrentCooordinate() {
+	private Coordinate getCurrentCoordinate() {
 		List<Integer> coordinateString =
 				Arrays.stream(getPosition().split(","))
 						.map(Integer::parseInt)

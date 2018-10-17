@@ -23,6 +23,7 @@ public class Route {
         int initCarX = Integer.parseInt(posStr[0]);
         int initCarY = Integer.parseInt(posStr[1]);
         this.map = map;
+        buildMap();
     }
 
     // Determines whether the give coordinate is a lava tile.
@@ -67,6 +68,31 @@ public class Route {
                 gridMap[coord.x][coord.y] = TRAP_OR_ROAD;
             }
         }
+    }
+
+    //check if the point is in the map
+    public boolean withinMap(int x, int y, int[][] map){
+        if(x < 0 || x >= map.length){
+            return false;
+        }
+        if(y < 0 || y >= map[0].length){
+            return false;
+        }
+        return true;
+    }
+
+    // update the map based on the location
+    public void updateMap(int x, int y, int value){
+        this.buildMap();
+        if(!withinMap(x, y, gridMap) || gridMap[x][y] == WALL || gridMap[x][y] < value){
+            return;
+        }
+        // then set the gridMap's value into given value (which is 0 in this case)
+        gridMap[x][y] = value;
+        updateMap(x-1, y, value+1);
+        updateMap(x+1, y, value+1);
+        updateMap(x, y-1, value+1);
+        updateMap(x, y+1, value+1);
     }
 
     // check if there is a wall on which side.
