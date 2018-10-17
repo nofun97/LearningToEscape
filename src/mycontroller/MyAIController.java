@@ -21,7 +21,6 @@ public class MyAIController extends CarController{
 	private enum Commands {FORWARD, REVERSE, LEFT, RIGHT, BRAKE};
 	private Queue<Commands> commandsQueue = new LinkedList<>();
 	private StrategyFactory strategy = new Strategy();
-	private Route map;
 	// to store how many keys already got
     private ArrayList<Coordinate> keyList = new ArrayList<>();
     private HashMap<Coordinate, MapTile> map = super.getMap();
@@ -114,6 +113,80 @@ public class MyAIController extends CarController{
 							currentOrientation = WorldSpatial.Direction.NORTH;
 						}
 					}
+                    break;
+                case WEST:
+                    if (Arrays.equals(direction, RIGHT_DIRECTION)){
+                        commandsQueue.add(Commands.REVERSE);
+                    } else if (Arrays.equals(direction, LEFT_DIRECTION)){
+                        commandsQueue.add(Commands.FORWARD);
+                        faceForward = true;
+                    } else if (Arrays.equals(direction, UP_DIRECTION)){
+                        commandsQueue.add(Commands.RIGHT);
+                        if (faceForward){
+                            currentOrientation = WorldSpatial.Direction.NORTH;
+                        } else {
+                            currentOrientation = WorldSpatial.Direction.SOUTH;
+                        }
+                    } else if (Arrays.equals(direction, DOWN_DIRECTION)){
+                        commandsQueue.add(Commands.LEFT);
+                        if (faceForward){
+                            currentOrientation = WorldSpatial.Direction.SOUTH;
+                        } else {
+                            currentOrientation = WorldSpatial.Direction.NORTH;
+                        }
+                    }
+                    break;
+                case NORTH:
+                    if (Arrays.equals(direction, RIGHT_DIRECTION)){
+                        commandsQueue.add(Commands.RIGHT);
+                        if (faceForward){
+                            currentOrientation = WorldSpatial.Direction.EAST;
+                        } else {
+                            currentOrientation = WorldSpatial.Direction.WEST;
+                        }
+                    } else if (Arrays.equals(direction, LEFT_DIRECTION)){
+                        commandsQueue.add(Commands.LEFT);
+                        if (faceForward){
+                            currentOrientation = WorldSpatial.Direction.WEST;
+                        } else {
+                            currentOrientation = WorldSpatial.Direction.EAST;
+                        }
+                    } else if (Arrays.equals(direction, UP_DIRECTION)){
+                        commandsQueue.add(Commands.FORWARD);
+                        faceForward = true;
+                    } else if (Arrays.equals(direction, DOWN_DIRECTION)){
+                        commandsQueue.add(Commands.REVERSE);
+                    }
+                    break;
+                case SOUTH:
+                    if (Arrays.equals(direction, RIGHT_DIRECTION)){
+                        commandsQueue.add(Commands.LEFT);
+                        if (faceForward){
+                            currentOrientation = WorldSpatial.Direction.EAST;
+                        } else {
+                            currentOrientation = WorldSpatial.Direction.WEST;
+                        }
+                    } else if (Arrays.equals(direction, LEFT_DIRECTION)){
+                        commandsQueue.add(Commands.RIGHT);
+                        if (faceForward){
+                            currentOrientation = WorldSpatial.Direction.WEST;
+                        } else {
+                            currentOrientation = WorldSpatial.Direction.EAST;
+                        }
+                    } else if (Arrays.equals(direction, UP_DIRECTION)){
+                        commandsQueue.add(Commands.REVERSE);
+                    } else if (Arrays.equals(direction, DOWN_DIRECTION)){
+                        commandsQueue.add(Commands.FORWARD);
+                        faceForward = true;
+                    }
+                    break;
+            }
+
+            currentCoordinate = coordinate;
+        }
+
+        commandsQueue.add(Commands.BRAKE);
+    }
     // update the view of the car (replace the normal tile with trap tile if given)
     private void updateMap() {
         HashMap<Coordinate, MapTile> currview = getView();
@@ -205,80 +278,7 @@ public class MyAIController extends CarController{
 //    public void handleTheTrap(Coordinate coord, MapTile mapTile){
 //	    //TODO: if there is a LAVA, based on the condition(do we have any keys?)
 //    }
-					break;
-				case WEST:
-					if (Arrays.equals(direction, RIGHT_DIRECTION)){
-						commandsQueue.add(Commands.REVERSE);
-					} else if (Arrays.equals(direction, LEFT_DIRECTION)){
-						commandsQueue.add(Commands.FORWARD);
-						faceForward = true;
-					} else if (Arrays.equals(direction, UP_DIRECTION)){
-						commandsQueue.add(Commands.RIGHT);
-						if (faceForward){
-							currentOrientation = WorldSpatial.Direction.NORTH;
-						} else {
-							currentOrientation = WorldSpatial.Direction.SOUTH;
-						}
-					} else if (Arrays.equals(direction, DOWN_DIRECTION)){
-						commandsQueue.add(Commands.LEFT);
-						if (faceForward){
-							currentOrientation = WorldSpatial.Direction.SOUTH;
-						} else {
-							currentOrientation = WorldSpatial.Direction.NORTH;
-						}
-					}
-					break;
-				case NORTH:
-					if (Arrays.equals(direction, RIGHT_DIRECTION)){
-						commandsQueue.add(Commands.RIGHT);
-						if (faceForward){
-							currentOrientation = WorldSpatial.Direction.EAST;
-						} else {
-							currentOrientation = WorldSpatial.Direction.WEST;
-						}
-					} else if (Arrays.equals(direction, LEFT_DIRECTION)){
-						commandsQueue.add(Commands.LEFT);
-						if (faceForward){
-							currentOrientation = WorldSpatial.Direction.WEST;
-						} else {
-							currentOrientation = WorldSpatial.Direction.EAST;
-						}
-					} else if (Arrays.equals(direction, UP_DIRECTION)){
-						commandsQueue.add(Commands.FORWARD);
-						faceForward = true;
-					} else if (Arrays.equals(direction, DOWN_DIRECTION)){
-						commandsQueue.add(Commands.REVERSE);
-					}
-					break;
-				case SOUTH:
-					if (Arrays.equals(direction, RIGHT_DIRECTION)){
-						commandsQueue.add(Commands.LEFT);
-						if (faceForward){
-							currentOrientation = WorldSpatial.Direction.EAST;
-						} else {
-							currentOrientation = WorldSpatial.Direction.WEST;
-						}
-					} else if (Arrays.equals(direction, LEFT_DIRECTION)){
-						commandsQueue.add(Commands.RIGHT);
-						if (faceForward){
-							currentOrientation = WorldSpatial.Direction.WEST;
-						} else {
-							currentOrientation = WorldSpatial.Direction.EAST;
-						}
-					} else if (Arrays.equals(direction, UP_DIRECTION)){
-						commandsQueue.add(Commands.REVERSE);
-					} else if (Arrays.equals(direction, DOWN_DIRECTION)){
-						commandsQueue.add(Commands.FORWARD);
-						faceForward = true;
-					}
-					break;
-			}
 
-			currentCoordinate = coordinate;
-		}
-
-		commandsQueue.add(Commands.BRAKE);
-	}
 
 	public void findBestPath(Coordinate nextDestination){
 
