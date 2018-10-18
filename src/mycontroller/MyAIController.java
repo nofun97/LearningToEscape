@@ -464,12 +464,7 @@ public class MyAIController extends CarController{
      * @return the converted string into coordinate
      */
 	private Coordinate getCurrentCoordinate() {
-		List<Integer> coordinateString =
-				Arrays.stream(getPosition().split(","))
-						.map(Integer::parseInt)
-						.collect(Collectors.toList());
-
-		return new Coordinate(coordinateString.get(0), coordinateString.get(1));
+		return new Coordinate(getPosition());
 	}
 
 }

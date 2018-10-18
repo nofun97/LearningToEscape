@@ -3,6 +3,7 @@ package mycontroller.states;
 import mycontroller.pathfinders.PathFinder;
 import mycontroller.Route;
 import utilities.Coordinate;
+import world.World;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,14 +39,7 @@ public class ExplorationState implements State {
          * initializing initial value
          */
         smallestValue = Integer.MAX_VALUE;
-        /*for (int[] x :
-                explorationMap) {
-            for (int y :
-                    x) {
-                System.out.printf("%2d ", y);
-            }
-            System.out.printf("\n");
-        }*/
+//        printExplorationMap();
 
         /**
          * Finding the smallest value of the coordinate that has not been
@@ -76,7 +70,7 @@ public class ExplorationState implements State {
                 smallestValue = currentValue;
             }
         }
-
+//        System.out.println(smallestValue);
         /**
          * Initial possible coordinate which are the coordinates around the car
          */
@@ -99,6 +93,9 @@ public class ExplorationState implements State {
          * Find the nearest unexplored spot
          */
         return findNearestUnexploredSpot(initialPossibleCoordinates);
+//        Coordinate x = findNearestUnexploredSpot(initialPossibleCoordinates);
+//        System.out.println(x.toString());
+//        return x;
     }
 
     /**
@@ -147,5 +144,16 @@ public class ExplorationState implements State {
          * coordinates
          */
         return findNearestUnexploredSpot(nextPossibleCoordinate);
+    }
+
+    private void printExplorationMap(){
+        for (int i = World.MAP_HEIGHT - 1; i >= 0; i--) {
+            int[] x = explorationMap[i];
+            for (int y :
+                    x) {
+                System.out.printf("%2d ", y);
+            }
+            System.out.printf("\n");
+        }
     }
 }

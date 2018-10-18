@@ -17,4 +17,5 @@ public interface StrategyFactory {
      */
     Coordinate decideNextCoordinate(Coordinate currentCoordinate);
 
+//    void updateData()
 }

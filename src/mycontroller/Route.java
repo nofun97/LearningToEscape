@@ -97,6 +97,10 @@ public class Route {
         }
     }*/
 
+    public void blockCoordinate(int x, int y){
+        gridMap[y][x] = Route.BLOCKED;
+    }
+
     //TODO This is a crude updateMap, will need more fixing
     public void updateMap(int x, int y){
 //        this.buildMap();

@@ -93,31 +93,25 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                         = DISTANCE;
 
                 initialPossibleCoordinates.add(
-                        new Integer[]{currentCoordinate.x - 1,
-                                currentCoordinate.y});
+                        new Integer[]{currentCoordinate.x,
+                                currentCoordinate.y - 1});
             }
         }
 
         /**
          * Manipulate array to calculate best path
          */
-        System.out.println(initialPossibleCoordinates.size());
+//        System.out.println(initialPossibleCoordinates.size());
         manipulateArray(initialPossibleCoordinates, destination);
 
-//        for (int i = World.MAP_HEIGHT - 1; i >= 0; i--) {
-//            int[] x = distanceArray[i];
-//            for (int y :
-//                    x) {
-//                if (y == Integer.MAX_VALUE){
-//                    System.out.print("-- ");
-//                } else{
-//                    System.out.printf("%2d ", y);
-//                }
-//            }
-//            System.out.printf("\n");
-//        }
-//        System.out.printf("\n");
-        return backtrack(currentCoordinate, destination);
+        printDistArray();
+//        return backtrack(currentCoordinate, destination);
+        List<Coordinate> x = backtrack(currentCoordinate, destination);
+        for (Coordinate a :
+                x) {
+            System.out.println(a.toString());
+        }
+        return x;
     }
 
     /**
@@ -185,7 +179,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                 break;
             }
         }
-
+//        printDistArray();
         /**
          * Recursively update the distance of every coordinate from the source
          * until it reaches the destination or if there is no more values to
@@ -250,8 +244,8 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                  * difference of values is, at maximum, to be 1, any path
                  * chosen will be fine.
                  */
-                if(distanceArray[currentY][currentX] >
-                        distanceArray[nextY][nextX]){
+                if(distanceArray[currentY][currentX] -
+                        distanceArray[nextY][nextX] == DISTANCE){
                     path.add(new Coordinate(nextX, nextY));
 //                    System.out.printf("%d %d\n", currentX, currentY);
                     /**
@@ -271,5 +265,21 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          */
         Collections.reverse(path);
         return path;
+    }
+
+    private void printDistArray(){
+        for (int i = World.MAP_HEIGHT - 1; i >= 0; i--) {
+            int[] x = distanceArray[i];
+            for (int y :
+                    x) {
+                if (y == Integer.MAX_VALUE){
+                    System.out.print("-- ");
+                } else{
+                    System.out.printf("%2d ", y);
+                }
+            }
+            System.out.printf("\n");
+        }
+        System.out.printf("\n");
     }
 }
