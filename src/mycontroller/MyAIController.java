@@ -1,6 +1,8 @@
 package mycontroller;
 
 import controller.CarController;
+import tiles.LavaTrap;
+import tiles.MudTrap;
 import utilities.Coordinate;
 import world.Car;
 import world.WorldSpatial;
@@ -17,6 +19,7 @@ public class MyAIController extends CarController{
 	private enum Commands {FORWARD, REVERSE, LEFT, RIGHT, BRAKE, NONE}
     private ArrayList<Coordinate> recordCoordinate = new ArrayList<>();
 	private Queue<Commands> commandsQueue = new LinkedList<>();
+    public static final int BLOCK = -1;
 //	private StrategyFactory strategy = new KeyPriorityStrategy();
 
 	// to store how many keys already got
@@ -342,9 +345,19 @@ public class MyAIController extends CarController{
         }
     }
 
+
     public void handleTheTrap(Coordinate coord, MapTile mapTile){
         //TODO: if there is a LAVA, based on the condition(do we have any keys?)
         //TODO: I think here need to implement strategy
+        if (mapTile instanceof MudTrap){
+            int[][] tempMap = route.getGridMap();
+            tempMap[coord.y][coord.x] = BLOCK;
+            // TODO: strategy, implement avoid
+        }
+        else if(mapTile instanceof LavaTrap){
+            // if we already have at least one key
+            if(((LavaTrap)mapTile).getKey() != 0)
+        }
     }
 
     /**
@@ -376,7 +389,6 @@ public class MyAIController extends CarController{
                 break;
 
         }
-
     }
 
     /**

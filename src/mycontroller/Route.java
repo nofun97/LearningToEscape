@@ -179,6 +179,12 @@ public class Route {
     public boolean checkCurrCoordValid(int CarX, int CarY){
         return gridMap[CarY][CarX] == TRAP_OR_ROAD;
     }
+
+    public int[][] getGridMap() {
+        return gridMap;
+    }
+
 }
+
 
 // TODO: one part left, how to know the search finished???
