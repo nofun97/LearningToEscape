@@ -122,15 +122,19 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          */
         manipulateArray(initialPossibleCoordinates, destination);
 
-//        for (int i = World.MAP_HEIGHT - 1; i >= 0; i--) {
-//            int[] x = distanceArray[i];
-//            for (int y :
-//                    x) {
-//                System.out.printf("%d ", y);
-//            }
-//            System.out.printf("\n");
-//        }
-//        System.out.printf("\n");
+        /*for (int i = World.MAP_HEIGHT - 1; i >= 0; i--) {
+            int[] x = distanceArray[i];
+            for (int y :
+                    x) {
+                if (y == Integer.MAX_VALUE){
+                    System.out.print("-- ");
+                } else{
+                    System.out.printf("%2d ", y);
+                }
+            }
+            System.out.printf("\n");
+        }
+        System.out.printf("\n");*/
         return backtrack(currentCoordinate, destination);
     }
 
@@ -268,11 +272,13 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                 if(distanceArray[currentY][currentX] >
                         distanceArray[nextY][nextX]){
                     path.add(new Coordinate(nextX, nextY));
+//                    System.out.printf("%d %d\n", currentX, currentY);
                     /**
                      * Change the currently processed coordinate
                      */
                     currentX = nextX;
                     currentY = nextY;
+
                     break;
                 }
             }
