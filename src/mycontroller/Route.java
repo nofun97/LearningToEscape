@@ -15,7 +15,7 @@ public class Route {
     private static final String LAVA = "lava";
     private static final String HEALTH = "health";
     public static final int BLOCKED = -1;
-    public static final int TRAP_OR_ROAD = 100;
+    public static final int TRAP_OR_ROAD = 0;
     public static final int LEFT = 1;
     public static final int RIGHT = 2;
 
