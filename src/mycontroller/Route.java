@@ -75,13 +75,8 @@ public class Route {
 
     //check if the coordinate is in the map
     public boolean withinMap(int x, int y, int[][] map){
-        if(x < 0 || x >= map.length){
-            return false;
-        }
-        if(y < 0 || y >= map[0].length){
-            return false;
-        }
-        return true;
+
+        return x < 0 || x >= World.MAP_WIDTH || y < 0 || y >= World.MAP_HEIGHT;
     }
 
     // update the map based on the location (useful for deciding which direction to go)
@@ -91,11 +86,11 @@ public class Route {
             return;
         }
         // then set the gridMap's value into given value (which is 0 in this case)
-        gridMap[x][y] = value;
-        updateMap(x-1, y, value+1);
-        updateMap(x+1, y, value+1);
-        updateMap(x, y-1, value+1);
-        updateMap(x, y+1, value+1);
+        gridMap[y][x] = value;
+        gridMap[y][x-1] = value + 1;
+        gridMap[y][x+1] = value + 1;
+        gridMap[y-1][x] = value + 1;
+        gridMap[y+1][x] = value + 1;
     }
 
     // check if there is a wall on which side.
@@ -182,10 +177,7 @@ public class Route {
 
     // check if the current point is valid (NOVANN but how to deal with a point surrounding by WALLLLLLLLL!!!!!!!!!!!!!!!!!)
     public boolean checkCurrCoordValid(int CarX, int CarY){
-        if(gridMap[CarX][CarY] == TRAP_OR_ROAD){
-            return true;
-        }
-        return false;
+        return gridMap[CarY][CarX] == TRAP_OR_ROAD;
     }
 }
 

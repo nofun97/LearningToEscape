@@ -417,6 +417,11 @@ public class MyAIController extends CarController{
 
 	}
 
+    /**
+     * Converting position from string into a coordinate
+     *
+     * @return the converted string into coordinate
+     */
 	private Coordinate getCurrentCoordinate() {
 		List<Integer> coordinateString =
 				Arrays.stream(getPosition().split(","))
