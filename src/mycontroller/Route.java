@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import tiles.MapTile;
-import tiles.TrapTile;
 import utilities.Coordinate;
 import world.World;
 import world.WorldSpatial;
@@ -15,7 +14,7 @@ public class Route {
     private PathFinder pathFinder;
     private static final String LAVA = "lava";
     private static final String HEALTH = "health";
-    public static final int WALL = -1;
+    public static final int BLOCKED = -1;
     public static final int TRAP_OR_ROAD = 100;
     public static final int LEFT = 1;
     public static final int RIGHT = 2;
@@ -58,9 +57,9 @@ public class Route {
         for(Coordinate coord: map.keySet()){
             MapTile currLoc = map.get(coord);
 
-            // if current loc is WALL, then mark this grid as WALL
+            // if current loc is BLOCKED, then mark this grid as BLOCKED
             if(currLoc.isType(MapTile.Type.WALL)){
-                gridMap[coord.y][coord.x] = WALL;
+                gridMap[coord.y][coord.x] = BLOCKED;
             }
 
             // do same thing with EXIT
@@ -74,7 +73,7 @@ public class Route {
     }
 
     //check if the coordinate is in the map
-    public boolean withinMap(int x, int y, int[][] map){
+    public boolean withinMap(int x, int y){
 
         return x < 0 || x >= World.MAP_WIDTH || y < 0 || y >= World.MAP_HEIGHT;
     }
@@ -82,52 +81,55 @@ public class Route {
     // update the map based on the location (useful for deciding which direction to go)
     public void updateMap(int x, int y, int value){
         this.buildMap();
-        if(!withinMap(x, y, gridMap) || gridMap[x][y] == WALL || gridMap[x][y] < value){
+        if(!withinMap(x, y) || gridMap[x][y] == BLOCKED || gridMap[x][y] < value){
             return;
         }
         // then set the gridMap's value into given value (which is 0 in this case)
         gridMap[y][x] = value;
-        gridMap[y][x-1] = value + 1;
-        gridMap[y][x+1] = value + 1;
-        gridMap[y-1][x] = value + 1;
-        gridMap[y+1][x] = value + 1;
+        for (int i = 0; i < PathFinder.NUM_OF_POSSIBLE_DIRECTION; i++) {
+            int nextX = x + PathFinder.DIRECTIONS_DELTA[i];
+            int nextY = y + PathFinder.DIRECTIONS_DELTA
+                    [(i+1)%PathFinder.NUM_OF_POSSIBLE_DIRECTION];
+
+            if(!isBlocked(nextX, nextY)) gridMap[nextY][nextX] = value + 1;
+        }
     }
 
     // check if there is a wall on which side.
     public int checkWall(WorldSpatial.Direction direction, int x, int y){
         switch (direction){
             case EAST:
-                if(gridMap[x][y+1] == WALL){
+                if(gridMap[x][y+1] == BLOCKED){
                     return LEFT;
                 }
-                else if (gridMap[x][y-1] == WALL) {
+                else if (gridMap[x][y-1] == BLOCKED) {
                     return RIGHT;
                 }
                 break;
 
             case WEST:
-                if(gridMap[x][y-1] == WALL){
+                if(gridMap[x][y-1] == BLOCKED){
                     return LEFT;
                 }
-                else if (gridMap[x][y+1] == WALL){
+                else if (gridMap[x][y+1] == BLOCKED){
                     return RIGHT;
                 }
                 break;
 
             case NORTH:
-                if(gridMap[x-1][y] == WALL){
+                if(gridMap[x-1][y] == BLOCKED){
                     return LEFT;
                 }
-                else if (gridMap[x+1][y] == WALL){
+                else if (gridMap[x+1][y] == BLOCKED){
                     return RIGHT;
                 }
                 break;
 
             case SOUTH:
-                if(gridMap[x+1][y] == WALL){
+                if(gridMap[x+1][y] == BLOCKED){
                     return LEFT;
                 }
-                else if (gridMap[x-1][y] == WALL){
+                else if (gridMap[x-1][y] == BLOCKED){
                     return RIGHT;
                 }
                 break;
@@ -136,7 +138,7 @@ public class Route {
     }
 
     // based on the lowest value, choose the next direction of the car
-    public Coordinate nextDirection(int carX, int carY){
+    public Coordinate findUnexploredCoordinate(int carX, int carY){
         // use array list to store four coordinates surrounding the car
         ArrayList<Coordinate> surrCoord = new ArrayList<>();
         // add the current position's surrounding coordinates
@@ -153,31 +155,19 @@ public class Route {
         // hasn't explored or less explore.
         for(Coordinate coord : surrCoord){
             int current = gridMap[coord.y][coord.x];
-            if(current < value && current != WALL){
+            if(current < value && !isBlocked(coord.x, coord.y)){
                 // then update
                 value = current;
                 lowestCoord = new Coordinate(coord.x, coord.y);
             }
-        }return lowestCoord;
-//        // check which direction to go next
-//        if(lowestCoord.x < carX){
-//            return WorldSpatial.Direction.WEST;
-//        }
-//        else if(lowestCoord.x > carX){
-//            return WorldSpatial.Direction.EAST;
-//        }
-//        else if(lowestCoord.y < carY){
-//            return WorldSpatial.Direction.SOUTH;
-//        }
-//        else if(lowestCoord.y > carY){
-//            return WorldSpatial.Direction.NORTH;
-//        }
-//        return null;
+        }
+
+        return lowestCoord;
     }
 
-    // check if the current point is valid (NOVANN but how to deal with a point surrounding by WALLLLLLLLL!!!!!!!!!!!!!!!!!)
-    public boolean checkCurrCoordValid(int CarX, int CarY){
-        return gridMap[CarY][CarX] == TRAP_OR_ROAD;
+
+    public boolean isBlocked(int x, int y){
+        return gridMap[y][x] == BLOCKED;
     }
 }
 

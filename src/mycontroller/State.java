@@ -1,4 +1,7 @@
 package mycontroller;
 
-public class State {
+import utilities.Coordinate;
+
+public interface State {
+    Coordinate getNextCoordinate();
 }

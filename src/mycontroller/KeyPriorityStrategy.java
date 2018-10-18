@@ -1,10 +1,8 @@
 package mycontroller;
 
-import tiles.MapTile;
 import utilities.Coordinate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class KeyPriorityStrategy implements StrategyFactory {
 
@@ -17,8 +15,10 @@ public class KeyPriorityStrategy implements StrategyFactory {
     }
 
     @Override
-    public Coordinate decideNextTile(HashMap<Coordinate, MapTile> map) {
+    public Coordinate decideNextCoordinate() {
 
         return null;
     }
+
+
 }

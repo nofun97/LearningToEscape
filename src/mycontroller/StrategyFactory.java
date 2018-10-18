@@ -2,6 +2,7 @@ package mycontroller;
 
 import tiles.MapTile;
 import utilities.Coordinate;
+import world.World;
 
 import java.util.HashMap;
 
@@ -11,12 +12,12 @@ import java.util.HashMap;
  * car.
  */
 public interface StrategyFactory {
+
     /**
      * Decide next tile coordinate.
      *
-     * @param map             the map
      * @return the coordinate
      */
-    Coordinate decideNextTile(HashMap<Coordinate, MapTile> map);
+    Coordinate decideNextCoordinate();
 
 }
