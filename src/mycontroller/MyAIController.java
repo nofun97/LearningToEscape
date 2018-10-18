@@ -45,8 +45,10 @@ public class MyAIController extends CarController{
     */
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
-
+        /**
+         *  Update the map based on the TRAP information given
+         */
+        updateMap();
 
         /**
          * Creating a command sequence to go to a certain point

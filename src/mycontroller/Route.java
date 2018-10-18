@@ -9,7 +9,7 @@ import world.World;
 import world.WorldSpatial;
 
 public class Route {
-    public int[][] gridMap = new int[World.MAP_HEIGHT][World.MAP_WIDTH];
+    private int[][] gridMap = new int[World.MAP_HEIGHT][World.MAP_WIDTH];
     private HashMap<Coordinate,MapTile> map;
     private Coordinate exit;
     private PathFinder pathFinder;
@@ -141,7 +141,7 @@ public class Route {
     }
 
     // based on the lowest value, choose the next direction of the car
-    public WorldSpatial.Direction nextDirection(int carX, int carY){
+    public Coordinate nextDirection(int carX, int carY){
         // use array list to store four coordinates surrounding the car
         ArrayList<Coordinate> surrCoord = new ArrayList<>();
         // add the current position's surrounding coordinates
@@ -157,27 +157,27 @@ public class Route {
         // find the minimum value of surrounding grid, this grid is the one which
         // hasn't explored or less explore.
         for(Coordinate coord : surrCoord){
-            int current = gridMap[coord.x][coord.y];
+            int current = gridMap[coord.y][coord.x];
             if(current < value && current != WALL){
                 // then update
                 value = current;
                 lowestCoord = new Coordinate(coord.x, coord.y);
             }
-        }
-        // check which direction to go next
-        if(lowestCoord.x < carX){
-            return WorldSpatial.Direction.WEST;
-        }
-        else if(lowestCoord.x > carX){
-            return WorldSpatial.Direction.EAST;
-        }
-        else if(lowestCoord.y < carY){
-            return WorldSpatial.Direction.SOUTH;
-        }
-        else if(lowestCoord.y > carY){
-            return WorldSpatial.Direction.NORTH;
-        }
-        return null;
+        }return lowestCoord;
+//        // check which direction to go next
+//        if(lowestCoord.x < carX){
+//            return WorldSpatial.Direction.WEST;
+//        }
+//        else if(lowestCoord.x > carX){
+//            return WorldSpatial.Direction.EAST;
+//        }
+//        else if(lowestCoord.y < carY){
+//            return WorldSpatial.Direction.SOUTH;
+//        }
+//        else if(lowestCoord.y > carY){
+//            return WorldSpatial.Direction.NORTH;
+//        }
+//        return null;
     }
 
     // check if the current point is valid (NOVANN but how to deal with a point surrounding by WALLLLLLLLL!!!!!!!!!!!!!!!!!)
