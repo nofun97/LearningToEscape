@@ -98,6 +98,11 @@ public class ExplorationState implements State {
 //        return x;
     }
 
+    @Override
+    public void addImportantCoordinate(Coordinate coordinate) {
+        ;
+    }
+
     /**
      * Find nearest unexplored coordinate.
      *

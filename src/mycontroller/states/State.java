@@ -14,4 +14,12 @@ public interface State {
      * @return the nearest coordinate
      */
     Coordinate getNearestCoordinate(Coordinate currentCoordinate);
+
+
+    /**
+     * Add important coordinate to each state.
+     *
+     * @param coordinate the coordinate
+     */
+    void addImportantCoordinate(Coordinate coordinate);
 }
