@@ -169,6 +169,12 @@ public class Route {
     public boolean isBlocked(int x, int y){
         return gridMap[y][x] == BLOCKED;
     }
+
+    public int[][] getGridMap() {
+        return gridMap;
+    }
+
 }
+
 
 // TODO: one part left, how to know the search finished???
