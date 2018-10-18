@@ -12,21 +12,6 @@ import java.util.List;
  * The PathFinder that uses the Breadth First Search Algorithm.
  */
 public class BreadthFirstSearchPathFinding implements PathFinder{
-    /**
-     * The constant DISTANCE as distance from one coordinate to the next
-     * coordinate is always 1.
-     */
-    public static final int DISTANCE = 1;
-    /**
-     * The constant NUM_OF_POSSIBLE_DIRECTION, a car can only go to one of
-     * the four directions from a coordinate.
-     */
-    public static final int NUM_OF_POSSIBLE_DIRECTION = 4;
-    /**
-     * The constant DIRECTIONS_DELTA, used to calculate possible next
-     * coordinates.
-     */
-    public static final int[] DIRECTIONS_DELTA = new int[]{0, 1, 0, -1};
 
     /**
      * distanceArray is used to execute the algorithm
@@ -72,18 +57,14 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
         if (orientation == WorldSpatial.Direction.EAST ||
                 orientation == WorldSpatial.Direction.WEST){
-
-            if(route.gridMap[currentCoordinate.y][currentCoordinate.x+1] !=
-                Route.WALL){
+            if(route.isBlocked(currentCoordinate.x + 1, currentCoordinate.y)) {
                 distanceArray[currentCoordinate.y][currentCoordinate.x + 1]
                         = DISTANCE;
                 initialPossibleCoordinates.add(
                         new Integer[]{currentCoordinate.x + 1,
                                 currentCoordinate.y});
             }
-
-            if(route.gridMap[currentCoordinate.y][currentCoordinate.x-1] !=
-                    Route.WALL){
+            if(route.isBlocked(currentCoordinate.x - 1, currentCoordinate.y)){
                 distanceArray[currentCoordinate.y][currentCoordinate.x - 1]
                         = DISTANCE;
 
@@ -94,8 +75,8 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
         } else if (orientation == WorldSpatial.Direction.SOUTH ||
                         orientation == WorldSpatial.Direction.NORTH){
-            if(route.gridMap[currentCoordinate.y+1][currentCoordinate.x] !=
-                    Route.WALL){
+
+            if(route.isBlocked(currentCoordinate.x, currentCoordinate.y + 1)){
 
                 distanceArray[currentCoordinate.y + 1][currentCoordinate.x]
                         = DISTANCE;
@@ -105,8 +86,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                                 currentCoordinate.y + 1});
             }
 
-            if(route.gridMap[currentCoordinate.y-1][currentCoordinate.x] !=
-                    Route.WALL){
+            if(route.isBlocked(currentCoordinate.x, currentCoordinate.y - 1)){
 
                 distanceArray[currentCoordinate.y - 1][currentCoordinate.x]
                         = DISTANCE;
@@ -159,8 +139,8 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
             /**
              * Convert the array into index
              */
-            int x = coordinate[0];
-            int y = coordinate[1];
+            int sourceX = coordinate[0];
+            int sourceY = coordinate[1];
 
             /**
              * Update the surrounding values should it fulfill the conditions
@@ -170,8 +150,8 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                 /**
                  * One of the surrounding coordinates to update
                  */
-                int nextX = x + DIRECTIONS_DELTA[i];
-                int nextY = y +
+                int nextX = sourceX + DIRECTIONS_DELTA[i];
+                int nextY = sourceY +
                         DIRECTIONS_DELTA[(i+1)%NUM_OF_POSSIBLE_DIRECTION];
 
                 /**
@@ -186,11 +166,14 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                  * Update the distance values should a faster way to reach there
                  * is faster and if it is not a wall
                  */
-                if(route.gridMap[nextY][nextX] != Route.WALL &&
-                        distanceArray[y][x] + DISTANCE <
+
+
+                if(!route.isBlocked(nextX, nextY) &&
+                        distanceArray[sourceY][sourceX] + DISTANCE <
                                 distanceArray[nextY][nextX]){
+
                     distanceArray[nextY][nextX] =
-                            distanceArray[y][x] + DISTANCE;
+                            distanceArray[sourceY][sourceX] + DISTANCE;
                     nextPossibleCoordinates.add(new Integer[]{nextX, nextY});
                 }
             }
@@ -198,7 +181,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
             /**
              * Reaching a destination means that the algorithm should stop
              */
-            if(x == destination.x && y == destination.y){
+            if(sourceX == destination.x && sourceY == destination.y){
                 reachedDestination = true;
                 break;
             }
