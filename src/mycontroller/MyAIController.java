@@ -11,14 +11,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import tiles.MapTile;
-import world.WorldSpatial;
 
 
 public class MyAIController extends CarController{
-	private enum Commands {FORWARD, REVERSE, LEFT, RIGHT, BRAKE};
+	private enum Commands {FORWARD, REVERSE, LEFT, RIGHT, BRAKE, NONE}
     private ArrayList<Coordinate> recordCoordinate = new ArrayList<>();
 	private Queue<Commands> commandsQueue = new LinkedList<>();
-	private StrategyFactory strategy = new Strategy();
+//	private StrategyFactory strategy = new KeyPriorityStrategy();
 
 	// to store how many keys already got
     private ArrayList<Coordinate> keyList = new ArrayList<>();
@@ -31,7 +30,7 @@ public class MyAIController extends CarController{
     // This is set to true when the car starts sticking to a wall.
     private boolean isFollowingWall = false;
     private Route route;
-
+//    private boolean calculated = false;
 	public MyAIController(Car car) {
 		super(car);
         route = new Route(map, super.getPosition());
@@ -51,6 +50,7 @@ public class MyAIController extends CarController{
         /**
          * Creating a command sequence to go to a certain point
          */
+//        if (commandsQueue.isEmpty() && !calculated)
         if (commandsQueue.isEmpty()){
             // TODO just a simple case, need to be fixed
 
@@ -58,19 +58,29 @@ public class MyAIController extends CarController{
              * Generate the next coordinate the car should go through
              */
             Coordinate x = getCurrentCoordinate();
-			Coordinate y = new Coordinate(x.x + 3, x.y - 1);
+//            System.out.println(x.toString());
+			Coordinate y = new Coordinate(15, 4);
 
             /**
              * Generate a list of coordinates that the car has to go through
              * using certain path finding calculation
              */
             List<Coordinate> z = pathFinder.findBestPath(x, y, getOrientation());
-
+//            for(Coordinate a: z){
+//                System.out.println(a.toString());
+//            }
             /**
              * Converting a list of coordinates into commands based on the car
              * condition
              */
             setCommandSequence(z);
+
+            /*for (Commands b :
+                    commandsQueue) {
+                System.out.println(b.toString());
+            }*/
+
+//            calculated = true;
 		}
 
         /**
@@ -94,6 +104,8 @@ public class MyAIController extends CarController{
 			case BRAKE:
 				applyBrake();
 				break;
+            case NONE:
+                break;
 		}
 
 
@@ -144,7 +156,7 @@ public class MyAIController extends CarController{
 			int deltaX = coordinate.x - currentCoordinate.x;
 			int deltaY = coordinate.y - currentCoordinate.y;
 			int[] direction = {deltaX, deltaY};
-
+//            System.out.println(Arrays.toString(direction));
             /**
              * Based on the car orientation and where the car is supposed to
              * go, it gives the correct command and the new orientation should
@@ -184,7 +196,9 @@ public class MyAIController extends CarController{
 							currentOrientation = WorldSpatial.Direction.NORTH;
 						}
 
-					}
+					} else if (accelerationApplied){
+					    commandsQueue.add(Commands.NONE);
+                    }
                     break;
                 case WEST:
                     if (Arrays.equals(direction, RIGHT_DIRECTION) &&
@@ -218,6 +232,8 @@ public class MyAIController extends CarController{
                             currentOrientation = WorldSpatial.Direction.NORTH;
                         }
 
+                    } else if (accelerationApplied){
+                        commandsQueue.add(Commands.NONE);
                     }
                     break;
                 case NORTH:
@@ -252,6 +268,8 @@ public class MyAIController extends CarController{
                         accelerationApplied = true;
                         commandsQueue.add(Commands.REVERSE);
 
+                    } else if (accelerationApplied){
+                        commandsQueue.add(Commands.NONE);
                     }
                     break;
                 case SOUTH:
@@ -286,6 +304,8 @@ public class MyAIController extends CarController{
                         commandsQueue.add(Commands.FORWARD);
                         faceForward = true;
 
+                    } else if (accelerationApplied){
+                        commandsQueue.add(Commands.NONE);
                     }
                     break;
             }
