@@ -1,7 +1,10 @@
 package mycontroller;
 
 import controller.CarController;
-import tiles.LavaTrap;
+import mycontroller.pathfinders.BreadthFirstSearchPathFinding;
+import mycontroller.pathfinders.PathFinder;
+import mycontroller.strategies.KeyPriorityStrategy;
+import mycontroller.strategies.StrategyFactory;
 import tiles.MudTrap;
 import utilities.Coordinate;
 import world.Car;
@@ -19,6 +22,8 @@ public class MyAIController extends CarController{
 	private enum Commands {FORWARD, REVERSE, LEFT, RIGHT, BRAKE, NONE}
     private ArrayList<Coordinate> recordCoordinate = new ArrayList<>();
 	private Queue<Commands> commandsQueue = new LinkedList<>();
+	private Queue<Coordinate> pathQueue;
+	private StrategyFactory strategy;
     public static final int BLOCK = -1;
 //	private StrategyFactory strategy = new KeyPriorityStrategy();
 
@@ -38,6 +43,9 @@ public class MyAIController extends CarController{
 		super(car);
         route = new Route(map, super.getPosition());
         pathFinder = new BreadthFirstSearchPathFinding(route);
+        pathQueue = new LinkedList<>();
+        strategy = new KeyPriorityStrategy(this.route);
+
 	}
 
 	/**
@@ -51,6 +59,8 @@ public class MyAIController extends CarController{
          *  Update the map based on the TRAP information given
          */
         updateMap();
+        Coordinate x = getCurrentCoordinate();
+        route.updateMap(x.x, x.y);
 
         /**
          * Creating a command sequence to go to a certain point
@@ -62,15 +72,17 @@ public class MyAIController extends CarController{
             /**
              * Generate the next coordinate the car should go through
              */
-            Coordinate x = getCurrentCoordinate();
-//            System.out.println(x.toString());
-			Coordinate y = new Coordinate(15, 4);
 
+//            System.out.println(x.toString());
+			Coordinate y = strategy.decideNextCoordinate(x);
+//            System.out.println(y.toString());
             /**
              * Generate a list of coordinates that the car has to go through
              * using certain path finding calculation
              */
-            List<Coordinate> z = pathFinder.findBestPath(x, y, getOrientation());
+            List<Coordinate> path =
+                    pathFinder.findBestPath(x, y, getOrientation());
+            pathQueue = new LinkedList<>(path);
 //            for(Coordinate a: z){
 //                System.out.println(a.toString());
 //            }
@@ -78,7 +90,7 @@ public class MyAIController extends CarController{
              * Converting a list of coordinates into commands based on the car
              * condition
              */
-            setCommandSequence(z);
+            setCommandSequence(path);
 
             /*for (Commands b :
                     commandsQueue) {
@@ -91,6 +103,8 @@ public class MyAIController extends CarController{
         /**
          * Taking the command enum and giving that command based on the enum
          */
+        checkOncomingCollision();
+
 		Commands nextCommand = commandsQueue.poll();
 		assert nextCommand != null;
 		switch (nextCommand){
@@ -115,6 +129,19 @@ public class MyAIController extends CarController{
 
 
 	}
+
+    /**
+     * Check the next coordinate where the car will head to and it will stop
+     * should it be a trap that kills or a wall
+     */
+	public void checkOncomingCollision(){
+	    Coordinate nextPath = pathQueue.poll();
+	    if (nextPath != null && route.isBlocked(nextPath.x, nextPath.y)){
+	        commandsQueue = new LinkedList<>();
+	        commandsQueue.add(Commands.BRAKE);
+        }
+    }
+
 
     /**
      * setCommandSequence takes a list of coordinates that the car has to go
@@ -354,10 +381,10 @@ public class MyAIController extends CarController{
             tempMap[coord.y][coord.x] = BLOCK;
             // TODO: strategy, implement avoid
         }
-        else if(mapTile instanceof LavaTrap){
-            // if we already have at least one key
-            if(((LavaTrap)mapTile).getKey() != 0)
-        }
+//        else if(mapTile instanceof LavaTrap){
+//            // if we already have at least one key
+//            if(((LavaTrap)mapTile).getKey() != 0)
+//        }
     }
 
     /**

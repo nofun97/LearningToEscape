@@ -1,4 +1,4 @@
-package mycontroller;
+package mycontroller.pathfinders;
 
 import utilities.Coordinate;
 import world.WorldSpatial;
@@ -37,6 +37,6 @@ public interface PathFinder {
      * @return the list
      */
     List<Coordinate> findBestPath(Coordinate currentCoordinate,
-                                         Coordinate destination,
-                                         WorldSpatial.Direction orientation);
+                                  Coordinate destination,
+                                  WorldSpatial.Direction orientation);
 }

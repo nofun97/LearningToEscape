@@ -2,6 +2,7 @@ package mycontroller;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import mycontroller.pathfinders.PathFinder;
 import tiles.MapTile;
 import utilities.Coordinate;
 import world.World;
@@ -73,15 +74,16 @@ public class Route {
     }
 
     //check if the coordinate is in the map
-    public boolean withinMap(int x, int y){
+    public static boolean isWithinMap(int x, int y){
 
-        return x < 0 || x >= World.MAP_WIDTH || y < 0 || y >= World.MAP_HEIGHT;
+        return !(x < 0 || x >= World.MAP_WIDTH || y < 0
+                || y >= World.MAP_HEIGHT);
     }
 
-    // update the map based on the location (useful for deciding which direction to go)
+    /*// update the map based on the location (useful for deciding which direction to go)
     public void updateMap(int x, int y, int value){
         this.buildMap();
-        if(!withinMap(x, y) || gridMap[x][y] == BLOCKED || gridMap[x][y] < value){
+        if(!isWithinMap(x, y) || gridMap[x][y] == BLOCKED || gridMap[x][y] < value){
             return;
         }
         // then set the gridMap's value into given value (which is 0 in this case)
@@ -92,6 +94,23 @@ public class Route {
                     [(i+1)%PathFinder.NUM_OF_POSSIBLE_DIRECTION];
 
             if(!isBlocked(nextX, nextY)) gridMap[nextY][nextX] = value + 1;
+        }
+    }*/
+
+    //TODO This is a crude updateMap, will need more fixing
+    public void updateMap(int x, int y){
+//        this.buildMap();
+        if(!isWithinMap(x, y) || gridMap[y][x] == BLOCKED){
+            return;
+        }
+        // then set the gridMap's value into given value (which is 0 in this case)
+        gridMap[y][x] += 1;
+        for (int i = 0; i < PathFinder.NUM_OF_POSSIBLE_DIRECTION; i++) {
+            int nextX = x + PathFinder.DIRECTIONS_DELTA[i];
+            int nextY = y + PathFinder.DIRECTIONS_DELTA
+                    [(i+1)%PathFinder.NUM_OF_POSSIBLE_DIRECTION];
+
+            if(!isBlocked(nextX, nextY)) gridMap[nextY][nextX] += 1;
         }
     }
 

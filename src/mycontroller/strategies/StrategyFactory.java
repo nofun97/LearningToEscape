@@ -1,10 +1,6 @@
-package mycontroller;
+package mycontroller.strategies;
 
-import tiles.MapTile;
 import utilities.Coordinate;
-import world.World;
-
-import java.util.HashMap;
 
 
 /**
@@ -17,7 +13,8 @@ public interface StrategyFactory {
      * Decide next tile coordinate.
      *
      * @return the coordinate
+     * @param currentCoordinate
      */
-    Coordinate decideNextCoordinate();
+    Coordinate decideNextCoordinate(Coordinate currentCoordinate);
 
 }
