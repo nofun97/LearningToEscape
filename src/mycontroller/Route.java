@@ -101,6 +101,34 @@ public class Route {
         gridMap[y][x] = Route.BLOCKED;
     }
 
+
+    public void blockFromSource(int x, int y){
+        blockCoordinate(x, y);
+        ArrayList<Coordinate> possibleCoordinate = new ArrayList<>();
+        possibleCoordinate.add(new Coordinate(x, y));
+        blockFromSource(possibleCoordinate);
+    }
+
+    public void blockFromSource(ArrayList<Coordinate> possibleCoordinates){
+        if(possibleCoordinates.isEmpty()) return;
+        ArrayList<Coordinate> nextPossibleCoordinates = new ArrayList<>();
+        for (Coordinate possibleCoordinate: possibleCoordinates) {
+            int sourceX = possibleCoordinate.x;
+            int sourceY = possibleCoordinate.y;
+            for (int i = 0; i < PathFinder.NUM_OF_POSSIBLE_DIRECTION; i++) {
+                int nextX = sourceX + PathFinder.DIRECTIONS_DELTA[i];
+                int nextY = sourceY + PathFinder.DIRECTIONS_DELTA
+                        [(i+1)%PathFinder.NUM_OF_POSSIBLE_DIRECTION];
+                if(!isWithinMap(nextX, nextY) || isBlocked(nextX, nextY))
+                    continue;
+
+                blockCoordinate(nextX, nextY);
+                nextPossibleCoordinates.add(new Coordinate(nextX, nextY));
+            }
+        }
+
+        blockFromSource(nextPossibleCoordinates);
+    }
     //TODO This is a crude updateMap, will need more fixing
     public void updateMap(int x, int y){
 //        this.buildMap();
@@ -114,7 +142,8 @@ public class Route {
             int nextY = y + PathFinder.DIRECTIONS_DELTA
                     [(i+1)%PathFinder.NUM_OF_POSSIBLE_DIRECTION];
 
-            if(!isBlocked(nextX, nextY)) gridMap[nextY][nextX] += 1;
+            if(isWithinMap(nextX, nextY) && !isBlocked(nextX, nextY))
+                gridMap[nextY][nextX] += 1;
         }
     }
 
@@ -195,6 +224,16 @@ public class Route {
 
     public int[][] getGridMap() {
         return gridMap;
+    }
+
+    public void printGridMap(){
+        for (int i = World.MAP_HEIGHT-1; i >= 0; i--) {
+            for (int a : gridMap[i]){
+                System.out.printf("%2d ", a);
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 
 }

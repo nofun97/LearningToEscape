@@ -25,15 +25,15 @@ public class KeyPriorityStrategy implements StrategyFactory {
     public Coordinate decideNextCoordinate(Coordinate currentCoordinate) {
         State currentState = explore;
         Coordinate nextCoordinate =
-                currentState.getNearestCoordinate(currentCoordinate);
+                currentState.getCoordinate(currentCoordinate);
 
         /*if (lastCoordinate == nextCoordinate){
             route.blockCoordinate(lastCoordinate.x, lastCoordinate.y);
             nextCoordinate =
-                    currentState.getNearestCoordinate(currentCoordinate);
+                    currentState.getCoordinate(currentCoordinate);
         }
-        recordCoordinate(nextCoordinate);*/
-
+        recordCoordinate(nextCoordinate);
+        System.out.println(nextCoordinate.toString());*/
         return nextCoordinate;
     }
 

@@ -9,7 +9,7 @@ public class ExitingState implements State{
     }
 
     @Override
-    public Coordinate getNearestCoordinate(Coordinate currentCoordinate) {
+    public Coordinate getCoordinate(Coordinate currentCoordinate) {
         return exit;
     }
 

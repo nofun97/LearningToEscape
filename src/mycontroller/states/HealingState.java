@@ -8,8 +8,8 @@ public class HealingState implements State {
     private ArrayList<Coordinate> healingTiles;
 
     @Override
-    public Coordinate getNearestCoordinate(Coordinate currentCoordinate) {
-        
+    public Coordinate getCoordinate(Coordinate currentCoordinate) {
+
 
         return null;
     }

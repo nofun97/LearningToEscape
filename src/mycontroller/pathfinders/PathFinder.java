@@ -27,6 +27,8 @@ public interface PathFinder {
      */
     int[] DIRECTIONS_DELTA = new int[]{0, 1, 0, -1};
 
+    List<Coordinate> UNREACHABLE = null;
+
     /**
      * Generate a sequence of points from the starting current coordinate to
      * the destination
@@ -39,4 +41,6 @@ public interface PathFinder {
     List<Coordinate> findBestPath(Coordinate currentCoordinate,
                                   Coordinate destination,
                                   WorldSpatial.Direction orientation);
+
+
 }

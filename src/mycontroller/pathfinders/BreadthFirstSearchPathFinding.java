@@ -58,44 +58,47 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
         if (orientation == WorldSpatial.Direction.EAST ||
                 orientation == WorldSpatial.Direction.WEST){
-            if(!route.isBlocked(currentCoordinate.x + 1, currentCoordinate.y)) {
-                distanceArray[currentCoordinate.y][currentCoordinate.x + 1]
-                        = DISTANCE;
-                initialPossibleCoordinates.add(
-                        new Integer[]{currentCoordinate.x + 1,
-                                currentCoordinate.y});
-            }
-            if(!route.isBlocked(currentCoordinate.x - 1, currentCoordinate.y)){
-                distanceArray[currentCoordinate.y][currentCoordinate.x - 1]
-                        = DISTANCE;
+            int possibleX1 = currentCoordinate.x + 1;
+            int possibleX2 = currentCoordinate.x - 1;
+            int possibleY = currentCoordinate.y;
+            if(Route.isWithinMap(possibleX1, possibleY) &&
+                    !route.isBlocked(possibleX1, possibleY)) {
 
+                distanceArray[possibleY][possibleX1] = DISTANCE;
                 initialPossibleCoordinates.add(
-                        new Integer[]{currentCoordinate.x - 1,
-                                currentCoordinate.y});
+                        new Integer[]{possibleX1, possibleY});
+            }
+
+            if(Route.isWithinMap(possibleX2, possibleY) &&
+                    !route.isBlocked(possibleX2, possibleY)) {
+
+                distanceArray[possibleY][possibleX2] = DISTANCE;
+                initialPossibleCoordinates.add(
+                        new Integer[]{possibleX2, possibleY});
             }
 
         } else if (orientation == WorldSpatial.Direction.SOUTH ||
                         orientation == WorldSpatial.Direction.NORTH){
+            int possibleY1 = currentCoordinate.y + 1;
+            int possibleY2 = currentCoordinate.y - 1;
+            int possibleX = currentCoordinate.x;
 
-            if(!route.isBlocked(currentCoordinate.x, currentCoordinate.y + 1)){
+            if(Route.isWithinMap(possibleX, possibleY1) &&
+                    !route.isBlocked(possibleX, possibleY1)) {
 
-                distanceArray[currentCoordinate.y + 1][currentCoordinate.x]
-                        = DISTANCE;
-
+                distanceArray[possibleY1][possibleX] = DISTANCE;
                 initialPossibleCoordinates.add(
-                        new Integer[]{currentCoordinate.x,
-                                currentCoordinate.y + 1});
+                        new Integer[]{possibleX, possibleY1});
             }
 
-            if(!route.isBlocked(currentCoordinate.x, currentCoordinate.y - 1)){
+            if(Route.isWithinMap(possibleX, possibleY2) &&
+                    !route.isBlocked(possibleX, possibleY2)) {
 
-                distanceArray[currentCoordinate.y - 1][currentCoordinate.x]
-                        = DISTANCE;
-
+                distanceArray[possibleY2][possibleX] = DISTANCE;
                 initialPossibleCoordinates.add(
-                        new Integer[]{currentCoordinate.x,
-                                currentCoordinate.y - 1});
+                        new Integer[]{possibleX, possibleY2});
             }
+
         }
 
         /**
@@ -104,14 +107,22 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 //        System.out.println(initialPossibleCoordinates.size());
         manipulateArray(initialPossibleCoordinates, destination);
 
-        printDistArray();
-//        return backtrack(currentCoordinate, destination);
-        List<Coordinate> x = backtrack(currentCoordinate, destination);
-        for (Coordinate a :
-                x) {
-            System.out.println(a.toString());
+        if (!isReachable(destination)){
+            return UNREACHABLE;
         }
-        return x;
+
+//        printDistArray();
+        return backtrack(currentCoordinate, destination);
+        /*List<Coordinate> x = backtrack(currentCoordinate, destination);
+//        for (Coordinate a :
+//                x) {
+//            System.out.println(a.toString());
+//        }
+        return x;*/
+    }
+
+    private boolean isReachable(Coordinate coordinate) {
+        return distanceArray[coordinate.y][coordinate.x] != Integer.MAX_VALUE;
     }
 
     /**
@@ -205,6 +216,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          */
         int currentX = destination.x;
         int currentY = destination.y;
+
         List<Coordinate> path = new ArrayList<>();
 
         /**
@@ -218,6 +230,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          */
         while(currentX != startingCoordinate.x ||
                 currentY != startingCoordinate.y){
+//            System.out.printf("%2d %2d\n", currentX, currentY);
             /**
              * Checking the surroundings
              */
@@ -237,7 +250,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                         || nextY >= World.MAP_HEIGHT){
                     continue;
                 }
-
+//                System.out.println("HERE");
                 /**
                  * Should the value of the current coordinate be higher than
                  * the neighouring values, the path is added. As the

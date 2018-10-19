@@ -59,9 +59,9 @@ public class MyAIController extends CarController{
          *  Update the map based on the TRAP information given
          */
         updateMap();
-        Coordinate x = getCurrentCoordinate();
-        route.updateMap(x.x, x.y);
-
+        Coordinate currentCoordinate = getCurrentCoordinate();
+        route.updateMap(currentCoordinate.x, currentCoordinate.y);
+//        route.printGridMap();
         /**
          * Creating a command sequence to go to a certain point
          */
@@ -72,32 +72,34 @@ public class MyAIController extends CarController{
             /**
              * Generate the next coordinate the car should go through
              */
-
-//            System.out.println(x.toString());
-			Coordinate y = strategy.decideNextCoordinate(x);
-//            System.out.println(y.toString());
+			Coordinate destination =
+                    strategy.decideNextCoordinate(currentCoordinate);
+//            System.out.println(destination.toString());
             /**
              * Generate a list of coordinates that the car has to go through
              * using certain path finding calculation
              */
             List<Coordinate> path =
-                    pathFinder.findBestPath(x, y, getOrientation());
+                    pathFinder.findBestPath
+                            (currentCoordinate, destination, getOrientation());
+
+            while(path == PathFinder.UNREACHABLE){
+                route.blockFromSource(destination.x, destination.y);
+                destination =  strategy.decideNextCoordinate(currentCoordinate);
+
+                System.out.println(destination.toString());
+
+                path = pathFinder.findBestPath
+                        (currentCoordinate, destination, getOrientation());
+            }
             pathQueue = new LinkedList<>(path);
-//            for(Coordinate a: z){
-//                System.out.println(a.toString());
-//            }
+            pathQueue.poll();
             /**
              * Converting a list of coordinates into commands based on the car
              * condition
              */
             setCommandSequence(path);
 
-            /*for (Commands b :
-                    commandsQueue) {
-                System.out.println(b.toString());
-            }*/
-
-//            calculated = true;
 		}
 
         /**
@@ -136,8 +138,13 @@ public class MyAIController extends CarController{
      */
 	public void checkOncomingCollision(){
 	    Coordinate nextPath = pathQueue.poll();
+	    /*if(nextPath != null){
+            System.out.println(route.isBlocked(nextPath.x, nextPath.y));
+            System.out.printf("%2d %2d\n",  nextPath.x, nextPath.y);
+        }*/
 	    if (nextPath != null && route.isBlocked(nextPath.x, nextPath.y)){
 	        commandsQueue = new LinkedList<>();
+	        System.out.println("HERE");
 	        commandsQueue.add(Commands.BRAKE);
         }
     }
@@ -368,6 +375,7 @@ public class MyAIController extends CarController{
                 //TODO: handled, no need to handle this point agiannnnnn.
                 map.put(tmp, newTile);
                 recordCoordinate.add(coord);
+                handleTheTrap(coord, map.get(coord));
             }
         }
     }
@@ -377,8 +385,7 @@ public class MyAIController extends CarController{
         //TODO: if there is a LAVA, based on the condition(do we have any keys?)
         //TODO: I think here need to implement strategy
         if (mapTile instanceof MudTrap){
-            int[][] tempMap = route.getGridMap();
-            tempMap[coord.y][coord.x] = BLOCK;
+            route.blockCoordinate(coord.x, coord.y);
             // TODO: strategy, implement avoid
         }
 //        else if(mapTile instanceof LavaTrap){
