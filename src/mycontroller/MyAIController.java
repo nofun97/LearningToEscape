@@ -4,7 +4,10 @@ import controller.CarController;
 import mycontroller.pathfinders.BreadthFirstSearchPathFinding;
 import mycontroller.pathfinders.PathFinder;
 import mycontroller.strategies.KeyPriorityStrategy;
+import mycontroller.strategies.MyStrategy;
 import mycontroller.strategies.StrategyFactory;
+import tiles.HealthTrap;
+import tiles.LavaTrap;
 import tiles.MudTrap;
 import utilities.Coordinate;
 import world.Car;
@@ -24,7 +27,10 @@ public class MyAIController extends CarController{
 	private Queue<Commands> commandsQueue = new LinkedList<>();
 	private Queue<Coordinate> pathQueue;
 	private StrategyFactory strategy;
+	private MyStrategy myStrategy;
     public static final int BLOCK = -1;
+    //TODO: just give a threshold
+    public static final int healthLimit = 90;
 //	private StrategyFactory strategy = new KeyPriorityStrategy();
 
 	// to store how many keys already got
@@ -45,6 +51,8 @@ public class MyAIController extends CarController{
         pathFinder = new BreadthFirstSearchPathFinding(route);
         pathQueue = new LinkedList<>();
         strategy = new KeyPriorityStrategy(this.route);
+        //TODO: cuz we need a place to store the key!!
+        myStrategy = new MyStrategy(car, route, keyList);
 
 	}
 
@@ -138,13 +146,8 @@ public class MyAIController extends CarController{
      */
 	public void checkOncomingCollision(){
 	    Coordinate nextPath = pathQueue.poll();
-	    /*if(nextPath != null){
-            System.out.println(route.isBlocked(nextPath.x, nextPath.y));
-            System.out.printf("%2d %2d\n",  nextPath.x, nextPath.y);
-        }*/
 	    if (nextPath != null && route.isBlocked(nextPath.x, nextPath.y)){
 	        commandsQueue = new LinkedList<>();
-	        System.out.println("HERE");
 	        commandsQueue.add(Commands.BRAKE);
         }
     }
@@ -381,17 +384,33 @@ public class MyAIController extends CarController{
     }
 
 
-    public void handleTheTrap(Coordinate coord, MapTile mapTile){
-        //TODO: if there is a LAVA, based on the condition(do we have any keys?)
-        //TODO: I think here need to implement strategy
+    public void handleTheTrap(Coordinate coordinate, MapTile mapTile){
         if (mapTile instanceof MudTrap){
-            route.blockCoordinate(coord.x, coord.y);
+            int[][] tempMap = route.getGridMap();
+            tempMap[coordinate.y][coordinate.x] = BLOCK;
             // TODO: strategy, implement avoid
         }
-//        else if(mapTile instanceof LavaTrap){
-//            // if we already have at least one key
-//            if(((LavaTrap)mapTile).getKey() != 0)
-//        }
+        //TODO: if there is a LAVA, based on the condition(do we have any keys?)
+        else if(mapTile instanceof LavaTrap){
+            // if we already have at least one key
+            if(((LavaTrap)mapTile).getKey() != 0){
+                //TODO: dont know should put which condition)
+                if(){
+                    myStrategy.gettingKey(coordinate);
+                }
+                // else just record the keys location
+                else{
+                    keyList.add(coordinate);
+                }
+                return;
+            }
+            else if(mapTile instanceof HealthTrap){
+                if(super.getHealth() <= healthLimit){
+                    myStrategy.getHealing(coordinate);
+                    return;
+                }
+            }
+        }
     }
 
     /**
