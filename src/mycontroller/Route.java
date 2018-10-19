@@ -1,5 +1,7 @@
 package mycontroller;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import mycontroller.pathfinders.PathFinder;
@@ -10,6 +12,7 @@ import world.WorldSpatial;
 
 public class Route {
     private int[][] gridMap = new int[World.MAP_HEIGHT][World.MAP_WIDTH];
+    private ArrayList<Coordinate> markedPointList = new ArrayList<>();
     private HashMap<Coordinate,MapTile> map;
     private Coordinate exit;
     private PathFinder pathFinder;
@@ -19,6 +22,7 @@ public class Route {
     public static final int TRAP_OR_ROAD = 0;
     public static final int LEFT = 1;
     public static final int RIGHT = 2;
+
 
     public Route(HashMap<Coordinate, MapTile> map, String position) {
         String[] posStr = position.split(",");
@@ -197,7 +201,59 @@ public class Route {
         return gridMap;
     }
 
+    // TODO: NOVAN i just temp write a method to compelte the strategy part, feel free to modify it
+    public boolean searchFinished() {
+        if(markedPointList.size() == 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public void setMarkPoint(int X, int Y){
+        for(int x = 0; x < gridMap.length; x++) {
+            for(int y = 0; y < gridMap[0].length; y++) {
+                if(y % 4 == 0 && x % 4 == 0 && gridMap[x][y] != BLOCKED) {
+                    markedPointList.add(new Coordinate(x, y));
+                }
+            }
+        }
+        sortMarkPoint(X, Y);
+    }
+
+    // to find the closest point from the car
+    public void sortMarkPoint(int Y, int X) {
+        for (Coordinate coor : markedPointList) {
+            coor.x = coor.x - X;
+            coor.y = coor.y - Y;
+        }
+        Collections.sort(markedPointList, MyComparator);
+        for (Coordinate coor : markedPointList) {
+            coor.x = coor.x + X;
+            coor.y = coor.y + Y;
+        }
+    }
+
+    public static Comparator<Coordinate> MyComparator = new Comparator<Coordinate>() {
+
+        public int compare(Coordinate s1, Coordinate s2) {
+
+            int s1Distance = Math.abs(s1.x * s1.x + s1.y * s1.y);
+            int s2Distance = Math.abs(s2.x * s2.x + s2.y * s2.y);
+
+            return s1Distance - s2Distance;
+        }
+    };
+
+    public Coordinate nextMarkPoint() {
+        Coordinate original = markedPointList.get(0);
+        return original;
+    }
+
+    public void updateCriticalList() {
+        markedPointList.remove(0);
+    }
+
+    public Coordinate getExit() {
+        return exit;
+    }
 }
-
-
-// TODO: one part left, how to know the search finished???
