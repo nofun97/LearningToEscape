@@ -42,5 +42,13 @@ public interface PathFinder {
                                   Coordinate destination,
                                   WorldSpatial.Direction orientation);
 
-
+    /**
+     * Find the nearest coordinate from a list of coordinates
+     * @param coordinates the list of coordinates
+     * @param currentCoordinate the current coordinate of the car
+     * @return
+     */
+    Coordinate findNearestCoordinate(List<Coordinate> coordinates,
+                                     Coordinate currentCoordinate,
+                                     WorldSpatial.Direction orientation);
 }

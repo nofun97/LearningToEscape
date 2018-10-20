@@ -4,7 +4,7 @@ import controller.CarController;
 import mycontroller.pathfinders.BreadthFirstSearchPathFinding;
 import mycontroller.pathfinders.PathFinder;
 import mycontroller.strategies.KeyPriorityStrategy;
-import mycontroller.strategies.MyStrategy;
+//import mycontroller.strategies.MyStrategy;
 import mycontroller.strategies.StrategyFactory;
 import tiles.HealthTrap;
 import tiles.LavaTrap;
@@ -27,7 +27,7 @@ public class MyAIController extends CarController{
 	private Queue<Commands> commandsQueue = new LinkedList<>();
 	private Queue<Coordinate> pathQueue;
 	private StrategyFactory strategy;
-	private MyStrategy myStrategy;
+//	private MyStrategy myStrategy;
     public static final int BLOCK = -1;
     //TODO: just give a threshold
     public static final int healthLimit = 90;
@@ -50,9 +50,9 @@ public class MyAIController extends CarController{
         route = new Route(map, super.getPosition());
         pathFinder = new BreadthFirstSearchPathFinding(route);
         pathQueue = new LinkedList<>();
-        strategy = new KeyPriorityStrategy(this.route);
+        strategy = new KeyPriorityStrategy(this.route, car, pathFinder);
         //TODO: cuz we need a place to store the key!!
-        myStrategy = new MyStrategy(car, route, keyList);
+//        myStrategy = new MyStrategy(car, route, keyList);
 
 	}
 
@@ -63,6 +63,7 @@ public class MyAIController extends CarController{
     */
 	@Override
 	public void update() {
+	    //TODO HANDLE LAVA AND WE ARE DONE YAYAYAYAYAYAYAYAYAYAYA
         /**
          *  Update the map based on the TRAP information given
          */
@@ -362,7 +363,6 @@ public class MyAIController extends CarController{
     }
 
     // LOOK AT THISSSSSS!!!!!!!! VERY IMPORTANT!!!!!
-    // TODO HELLLOOOOOH THE CAR CAN SPIN YAY it's 2 AM im dying
     // update the view of the car (replace the normal tile with trap tile if given)
     private void updateMap() {
         HashMap<Coordinate, MapTile> currentView = getView();
@@ -370,6 +370,20 @@ public class MyAIController extends CarController{
 
         for(Coordinate coord : currentView.keySet()) {
             newTile = currentView.get(coord);
+
+            if(newTile.isType(MapTile.Type.TRAP)
+                    && newTile instanceof LavaTrap
+                    && ((LavaTrap) newTile).getKey() > 0){
+                strategy.updateData(coord, StrategyFactory.IMPORTANT_DATA.KEY);
+            } else if (newTile.isType(MapTile.Type.TRAP) &&
+                    newTile instanceof HealthTrap){
+                strategy.updateData
+                        (coord, StrategyFactory.IMPORTANT_DATA.HEALING);
+            } else if (newTile.isType(MapTile.Type.FINISH)){
+                strategy.updateData(coord, StrategyFactory.IMPORTANT_DATA.EXIT);
+            }
+
+
             Coordinate tmp = new Coordinate(coord.x, coord.y);
             currentTile = map.get(tmp);
             if(currentTile != null && newTile.getType() != currentTile.getType()
@@ -378,13 +392,13 @@ public class MyAIController extends CarController{
                 //TODO: handled, no need to handle this point agiannnnnn.
                 map.put(tmp, newTile);
                 recordCoordinate.add(coord);
-                handleTheTrap(coord, map.get(coord));
+//                handleTheTrap(coord, map.get(coord));
             }
         }
     }
 
 
-    public void handleTheTrap(Coordinate coordinate, MapTile mapTile){
+   /* public void handleTheTrap(Coordinate coordinate, MapTile mapTile){
         if (mapTile instanceof MudTrap){
             int[][] tempMap = route.getGridMap();
             tempMap[coordinate.y][coordinate.x] = BLOCK;
@@ -395,13 +409,13 @@ public class MyAIController extends CarController{
             // if we already have at least one key
             if(((LavaTrap)mapTile).getKey() != 0){
                 //TODO: dont know should put which condition)
-                if(){
-                    myStrategy.gettingKey(coordinate);
-                }
-                // else just record the keys location
-                else{
-                    keyList.add(coordinate);
-                }
+//                if(){
+//                    myStrategy.gettingKey(coordinate);
+//                }
+//                // else just record the keys location
+//                else{
+//                    keyList.add(coordinate);
+//                }
                 return;
             }
             else if(mapTile instanceof HealthTrap){
@@ -411,7 +425,7 @@ public class MyAIController extends CarController{
                 }
             }
         }
-    }
+    }*/
 
     /**
      * Turn the car anti-clockwise

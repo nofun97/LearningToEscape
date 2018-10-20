@@ -4,6 +4,7 @@ import mycontroller.pathfinders.PathFinder;
 import mycontroller.Route;
 import utilities.Coordinate;
 import world.World;
+import world.WorldSpatial;
 
 import java.util.*;
 
@@ -12,6 +13,10 @@ import java.util.*;
  */
 public class ExplorationState implements State {
     public static final Coordinate ALL_EXPLORED = null;
+    public static final int UNEXPLORED = 0;
+    public static final int LEVELS_TO_SKIP = 2;
+    private int modifier;
+    private boolean finished = false;
     /**
      * a map that marks which coordinate has not been explored
      */
@@ -33,7 +38,8 @@ public class ExplorationState implements State {
     }
 
     @Override
-    public Coordinate getCoordinate(Coordinate currentCoordinate) {
+    public Coordinate getCoordinate(Coordinate currentCoordinate,
+                                    WorldSpatial.Direction orientation) {
         /**
          * initializing initial value
          */
@@ -73,14 +79,29 @@ public class ExplorationState implements State {
         /**
          * Initial possible coordinate which are the coordinates around the car
          */
+        modifier = orientationPriorityModifier(orientation);
         Set<Coordinate> initialPossibleCoordinates = new LinkedHashSet<>();
         Set<Coordinate> addedCoordinates = new HashSet<>();
-        Coordinate initialCoordinate = new Coordinate(currentCoordinate.x,
-                currentCoordinate.y);
+        int sourceX = currentCoordinate.x;
+        int sourceY = currentCoordinate.y;
+        addedCoordinates.add(currentCoordinate);
+        for (int i = 0; i < PathFinder.NUM_OF_POSSIBLE_DIRECTION; i++) {
+            int index1 = (i + modifier) % PathFinder.NUM_OF_POSSIBLE_DIRECTION;
+            int index2 =
+                    (i + modifier + 1) %
+                            PathFinder.NUM_OF_POSSIBLE_DIRECTION;
+            int nextX = sourceX + PathFinder.DIRECTIONS_DELTA[index1];
+            int nextY = sourceY + PathFinder.DIRECTIONS_DELTA[index2];
+            Coordinate coordinate = new Coordinate(nextX, nextY);
 
-        initialPossibleCoordinates.add(initialCoordinate);
-        addedCoordinates.add(initialCoordinate);
-        printExplorationMap();
+            if (!Route.isWithinMap(nextX, nextY) || explorationMap[nextY][nextX]
+                    == Route.BLOCKED || addedCoordinates.contains(coordinate))
+                continue;
+
+            initialPossibleCoordinates.add(coordinate);
+            addedCoordinates.add(coordinate);
+        }
+
 
 
         /**
@@ -95,6 +116,31 @@ public class ExplorationState implements State {
         ;
     }
 
+    @Override
+    public int getSize() {
+        return 1;
+    }
+
+    /**
+     * A priority modifier for finding unexplore spots, the integer returned
+     * adds a number that will push the starting values of the PathFinder
+     * .DIRECTIONS_DELTA
+     * @param orientation current orientation of the car
+     * @return the number modifier
+     */
+    private int orientationPriorityModifier(WorldSpatial.Direction orientation){
+        switch (orientation){
+            case EAST:
+                return 0;
+            case NORTH:
+                return 1;
+            case WEST:
+                return 2;
+            case SOUTH:
+                return 3;
+        }
+        return 0;
+    }
     /**
      * Find nearest unexplored coordinate.
      *
@@ -107,7 +153,7 @@ public class ExplorationState implements State {
                                                 Set<Coordinate>
                                                         addedCoordinates){
         Set<Coordinate> nextPossibleCoordinate = new LinkedHashSet<>();
-
+        Set<Coordinate> surroundingCoordinates = new LinkedHashSet<>();
         /**
          * Iterate through the possible coordinates and adding the next
          * possible coordinates
@@ -120,45 +166,65 @@ public class ExplorationState implements State {
          */
 
         //TODO this needs to be handled by strategy
-        if (possibleCoordinate.isEmpty()) return ALL_EXPLORED;
+        if (possibleCoordinate.isEmpty()){
+            finished = true;
+            return ALL_EXPLORED;
+        }
 
-        for (Coordinate currentCoordinate: possibleCoordinate) {
-
-            /**
-             * Iterate through each coordinate starting from the ones nearest to
-             * the car to the furthest to find the nearest coordinate with
-             * the smallest value
-             */
-            int currentX = currentCoordinate.x;
-            int currentY = currentCoordinate.y;
-
-            for (int i = 0; i < PathFinder.NUM_OF_POSSIBLE_DIRECTION; i++) {
-                int nextX = currentX + PathFinder.DIRECTIONS_DELTA[i];
-                int nextY = currentY + PathFinder.DIRECTIONS_DELTA
-                        [(i+1)%PathFinder.NUM_OF_POSSIBLE_DIRECTION];
-                Coordinate coordinate = new Coordinate(nextX, nextY);
-
-                if(!Route.isWithinMap(nextX, nextY)) continue;
-
-                if(explorationMap[nextY][nextX] == smallestValue){
-//                    System.out.printf("%d %d\n", nextX, nextY);
-                    return new Coordinate(nextX, nextY);
-                } else if (explorationMap[nextY][nextX] != Route.BLOCKED &&
-                        !addedCoordinates.contains(coordinate)){
-                    /**
-                     * If coordinate has not been checked, it will be added
-                     * into the next checked coordinate
-                     */
-
-                    nextPossibleCoordinate.add(coordinate);
-                }
+        for (int level = 0; level < LEVELS_TO_SKIP; level++) {
+            Set<Coordinate> setToIterate;
+            Set<Coordinate> setToAdd;
+            if(level == 0){
+                setToIterate = possibleCoordinate;
+                setToAdd = surroundingCoordinates;
+            } else {
+                setToIterate = surroundingCoordinates;
+                setToAdd = nextPossibleCoordinate;
+            }
+            for (Coordinate currentCoordinate: setToIterate) {
 
                 /**
-                 * Record checked coordinates
+                 * Iterate through each coordinate starting from the ones nearest to
+                 * the car to the furthest to find the nearest coordinate with
+                 * the smallest value
                  */
-                addedCoordinates.add(coordinate);
+                int currentX = currentCoordinate.x;
+                int currentY = currentCoordinate.y;
+
+                for (int i = 0; i < PathFinder.NUM_OF_POSSIBLE_DIRECTION; i++) {
+                    int index1 = (i + modifier) %
+                            PathFinder.NUM_OF_POSSIBLE_DIRECTION;
+                    int index2 =
+                            (i + modifier + 1) %
+                                    PathFinder.NUM_OF_POSSIBLE_DIRECTION;
+                    int nextX = currentX + PathFinder.DIRECTIONS_DELTA[index1];
+                    int nextY = currentY + PathFinder.DIRECTIONS_DELTA[index2];
+                    Coordinate coordinate = new Coordinate(nextX, nextY);
+
+                    if(!Route.isWithinMap(nextX, nextY)) continue;
+
+                    if(level == LEVELS_TO_SKIP-1 &&
+                            explorationMap[nextY][nextX] == smallestValue){
+//                    System.out.printf("%d %d\n", nextX, nextY);
+                        return new Coordinate(nextX, nextY);
+                    } else if (explorationMap[nextY][nextX] != Route.BLOCKED &&
+                            !addedCoordinates.contains(coordinate)){
+                        /**
+                         * If coordinate has not been checked, it will be added
+                         * into the next checked coordinate
+                         */
+
+                        setToAdd.add(coordinate);
+                    }
+                    addedCoordinates.add(coordinate);
+
+                    /**
+                     * Record checked coordinates
+                     */
+                }
             }
         }
+
 //        System.out.println(nextPossibleCoordinate.size());
 //        printExplorationMap();
         /**
@@ -167,6 +233,18 @@ public class ExplorationState implements State {
          */
         return findNearestUnexploredSpot(nextPossibleCoordinate,
                 addedCoordinates);
+    }
+
+    @Override
+    public boolean isFinished() {
+        if(finished) return true;
+        for (int[] row: explorationMap){
+            if(Arrays.stream(row).anyMatch(x -> x == UNEXPLORED)){
+                return false;
+            }
+        }
+        finished = true;
+        return true;
     }
 
     private void printExplorationMap(){

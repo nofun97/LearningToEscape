@@ -1,6 +1,7 @@
 package mycontroller.states;
 import mycontroller.Route;
-import mycontroller.strategies.MyStrategy;
+import mycontroller.pathfinders.PathFinder;
+//import mycontroller.strategies.MyStrategy;
 import utilities.Coordinate;
 import world.Car;
 
@@ -24,11 +25,13 @@ import world.Car;
 //        exit = coordinate;
 //    }
 //}
-public class ExitingState extends MyState{
-    /**
-     * constructor
-     */
-    public ExitingState(Coordinate coord, Car car, Route route, MyStrategy strategy) {
-        super(coord, car, route, strategy);
+public class ExitingState extends CoordinateTrackerStates {
+    public ExitingState(PathFinder pathFinder, Route route) {
+        super(pathFinder, route);
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
     }
 }

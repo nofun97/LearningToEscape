@@ -11,10 +11,7 @@ import java.util.ArrayList;
  */
 public interface StrategyFactory {
 
-    ArrayList<Coordinate> keyList = new ArrayList<>();
-    ArrayList<Coordinate> healCoordinate = new ArrayList<>();
-    ArrayList<Coordinate> exitList = new ArrayList<>();
-
+    enum IMPORTANT_DATA {KEY, HEALING, EXIT}
     /**
      * Decide next tile coordinate.
      *
@@ -23,5 +20,5 @@ public interface StrategyFactory {
      */
     Coordinate decideNextCoordinate(Coordinate currentCoordinate);
 
-//    void updateData()
+    void updateData(Coordinate coordinate, IMPORTANT_DATA type);
 }

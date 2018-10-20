@@ -1,16 +1,17 @@
+/*
 package mycontroller.strategies;
 import java.util.*;
 
 import mycontroller.Route;
 import mycontroller.states.GettingKeyState;
 import mycontroller.states.HealingState;
-import mycontroller.states.MyState;
+import mycontroller.states.CoordinateTrackerStates;
 import utilities.Coordinate;
 import world.Car;
 
 public class MyStrategy {
     private Car car;
-    private MyState state;
+    private CoordinateTrackerStates state;
     private Route route;
     private ArrayList<Coordinate> keyList = new ArrayList<>();
 
@@ -62,3 +63,4 @@ public class MyStrategy {
         }
     }
 }
+*/

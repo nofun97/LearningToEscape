@@ -54,6 +54,59 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          * first, therefore there is only a maximum of two possible points
          * right after the initial coordinate.
          */
+        List<Integer[]> initialPossibleCoordinates =
+                calculateInitialPossibleCoordinate
+                        (currentCoordinate, orientation);
+
+        /**
+         * Manipulate array to calculate best path
+         */
+//        System.out.println(initialPossibleCoordinates.size());
+        manipulateArray(initialPossibleCoordinates, destination);
+
+        if (!isReachable(destination)){
+            return UNREACHABLE;
+        }
+
+//        printDistArray();
+        return backtrack(currentCoordinate, destination);
+        /*List<Coordinate> x = backtrack(currentCoordinate, destination);
+//        for (Coordinate a :
+//                x) {
+//            System.out.println(a.toString());
+//        }
+        return x;*/
+    }
+
+    @Override
+    public Coordinate findNearestCoordinate(List<Coordinate> coordinates,
+                                            Coordinate currentCoordinate,
+                                            WorldSpatial.Direction orientation){
+        Coordinate nearestCoordinate = null;
+        int minimumDistance = Integer.MAX_VALUE;
+        List<Integer[]> initialPossibleCoordinates =
+                calculateInitialPossibleCoordinate
+                        (currentCoordinate, orientation);
+
+        manipulateArray(initialPossibleCoordinates,
+                new Coordinate(-1, -1));
+
+        for(Coordinate coordinate: coordinates){
+            int x = coordinate.x;
+            int y = coordinate.y;
+
+            if(minimumDistance > distanceArray[y][x]){
+                minimumDistance = distanceArray[y][x];
+                nearestCoordinate = coordinate;
+            }
+        }
+        assert nearestCoordinate != null;
+        System.out.println(nearestCoordinate.toString());
+        return nearestCoordinate;
+    }
+
+    private List<Integer[]> calculateInitialPossibleCoordinate
+            (Coordinate currentCoordinate,  WorldSpatial.Direction orientation){
         ArrayList<Integer[]> initialPossibleCoordinates = new ArrayList<>();
 
         if (orientation == WorldSpatial.Direction.EAST ||
@@ -78,7 +131,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
             }
 
         } else if (orientation == WorldSpatial.Direction.SOUTH ||
-                        orientation == WorldSpatial.Direction.NORTH){
+                orientation == WorldSpatial.Direction.NORTH){
             int possibleY1 = currentCoordinate.y + 1;
             int possibleY2 = currentCoordinate.y - 1;
             int possibleX = currentCoordinate.x;
@@ -101,24 +154,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
         }
 
-        /**
-         * Manipulate array to calculate best path
-         */
-//        System.out.println(initialPossibleCoordinates.size());
-        manipulateArray(initialPossibleCoordinates, destination);
-
-        if (!isReachable(destination)){
-            return UNREACHABLE;
-        }
-
-//        printDistArray();
-        return backtrack(currentCoordinate, destination);
-        /*List<Coordinate> x = backtrack(currentCoordinate, destination);
-//        for (Coordinate a :
-//                x) {
-//            System.out.println(a.toString());
-//        }
-        return x;*/
+        return initialPossibleCoordinates;
     }
 
     private boolean isReachable(Coordinate coordinate) {
@@ -132,10 +168,12 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
      *                            surrounding values will be updated
      * @param destination the destination
      */
-    private void manipulateArray(ArrayList<Integer[]> possibleCoordinates,
+    private void manipulateArray(List<Integer[]> possibleCoordinates,
                                  Coordinate destination){
 
         boolean reachedDestination = false;
+
+        if(possibleCoordinates.isEmpty()) return;
 
         /**
          * Gathering next coordinates as the centre point for its surrounding
