@@ -40,17 +40,18 @@ public class KeyPriorityStrategy implements StrategyFactory {
         }
 
         if(car.getKeys().size() == car.numKeys && exit.getSize() > 0){
-//            System.out.println(1);
+            System.out.println(1);
             currentState = exit;
         } else if (!healCommences &&
                 car.getHealth() <= MINIMUM_HEALTH && heal.getSize() > 0){
-//            System.out.println(2);
+            System.out.println(2);
             currentState = heal;
             healCommences = true;
         } else if (getKey.getSize() > 0){
+            System.out.println(3);
             currentState = getKey;
         } else {
-//            System.out.println(4);
+            System.out.println(4);
             currentState = explore;
         }
 

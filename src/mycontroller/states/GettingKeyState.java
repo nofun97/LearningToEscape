@@ -51,7 +51,8 @@ public class GettingKeyState extends CoordinateTrackerStates {
     }
 
     @Override
-    public Coordinate getCoordinate(Coordinate currentCoordinate, WorldSpatial.Direction orientation) {
+    public Coordinate getCoordinate(Coordinate currentCoordinate,
+                                    WorldSpatial.Direction orientation) {
         Coordinate nearestCoordinate = super.getCoordinate(currentCoordinate,
                 orientation);
         removeCoordinate(nearestCoordinate);

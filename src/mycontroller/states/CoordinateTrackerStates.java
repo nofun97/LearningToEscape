@@ -2,6 +2,7 @@ package mycontroller.states;
 
 import mycontroller.Route;
 import mycontroller.pathfinders.PathFinder;
+import org.lwjgl.Sys;
 import utilities.Coordinate;
 import world.WorldSpatial;
 
@@ -40,6 +41,8 @@ public abstract class CoordinateTrackerStates implements State{
     @Override
     public Coordinate getCoordinate(Coordinate currentCoordinate, WorldSpatial.Direction orientation) {
         assert importantCoordinates != null;
+//        System.out.println(importantCoordinates);
+
         Coordinate nearestCoordinate =
                 pathFinder.findNearestCoordinate(
                         new ArrayList<>(importantCoordinates),
