@@ -27,6 +27,8 @@ public interface State {
      */
     void addImportantCoordinate(Coordinate coordinate);
 
+    void removeCoordinate(Coordinate coordinate);
+
     boolean isFinished();
 
     int getSize();

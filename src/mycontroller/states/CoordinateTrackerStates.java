@@ -63,7 +63,9 @@ public abstract class CoordinateTrackerStates implements State{
     @Override
     public int getSize(){return importantCoordinates.size();}
 
+    @Override
     public void removeCoordinate(Coordinate coordinate) {
+        if(!importantCoordinates.contains(coordinate)) return;
         importantCoordinates.remove(coordinate);
     }
 }

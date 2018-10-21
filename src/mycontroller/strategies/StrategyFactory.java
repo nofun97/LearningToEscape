@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * car.
  */
 public interface StrategyFactory {
-
+    int MINIMUM_HEALTH = 50;
     enum IMPORTANT_DATA {KEY, HEALING, EXIT}
     /**
      * Decide next tile coordinate.

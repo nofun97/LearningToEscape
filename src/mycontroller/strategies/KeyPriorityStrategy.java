@@ -8,7 +8,7 @@ import world.Car;
 
 public class KeyPriorityStrategy implements StrategyFactory {
 
-    public static final int MINIMUM_HEALTH = 50;
+
     private boolean healCommences = false;
     private Route route;
 //    private Coordinate lastCoordinate;
@@ -18,7 +18,7 @@ public class KeyPriorityStrategy implements StrategyFactory {
     public KeyPriorityStrategy(Route route, Car car, PathFinder pathFinder) {
         this.route = route;
         this.car = car;
-        this.explore = new ExplorationState(this.route.getGridMap());
+        this.explore = new ExplorationState(this.route);
         this.heal = new HealingState(pathFinder, route, car);
         this.getKey = new GettingKeyState(pathFinder, route);
 //        this.lastCoordinate = new Coordinate(-1, -1);
@@ -32,26 +32,23 @@ public class KeyPriorityStrategy implements StrategyFactory {
     public Coordinate decideNextCoordinate(Coordinate currentCoordinate) {
         State currentState = null;
         if(healCommences){
-          if(heal.isFinished()){
+            currentState = heal;
+            if(heal.isFinished()){
               healCommences = false;
-          } else {
-              currentState = heal;
           }
-        }
-
-        if(car.getKeys().size() == car.numKeys && exit.getSize() > 0){
-            System.out.println(1);
+        } else if(car.getKeys().size() == car.numKeys && exit.getSize() > 0){
+            System.out.println("Exiting");
             currentState = exit;
         } else if (!healCommences &&
                 car.getHealth() <= MINIMUM_HEALTH && heal.getSize() > 0){
-            System.out.println(2);
+            System.out.println("Healing");
             currentState = heal;
             healCommences = true;
         } else if (getKey.getSize() > 0){
-            System.out.println(3);
+            System.out.println("Get Keys");
             currentState = getKey;
-        } else {
-            System.out.println(4);
+        } else if (!healCommences){
+            System.out.println("Dora Dora Dora the Explorer");
             currentState = explore;
         }
 
@@ -59,6 +56,7 @@ public class KeyPriorityStrategy implements StrategyFactory {
         Coordinate nextCoordinate =
                 currentState.getCoordinate(currentCoordinate,
                         car.getOrientation());
+//        System.out.println(nextCoordinate.toString());
 /*      if (lastCoordinate == nextCoordinate){
             route.blockCoordinate(lastCoordinate.x, lastCoordinate.y);
             nextCoordinate =

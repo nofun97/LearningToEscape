@@ -51,4 +51,6 @@ public interface PathFinder {
     Coordinate findNearestCoordinate(List<Coordinate> coordinates,
                                      Coordinate currentCoordinate,
                                      WorldSpatial.Direction orientation);
+
+    boolean isReachable(Coordinate currentCoordinate, Coordinate destination);
 }

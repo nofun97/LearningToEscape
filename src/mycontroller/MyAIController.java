@@ -14,7 +14,6 @@ import world.Car;
 import world.WorldSpatial;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -51,7 +50,6 @@ public class MyAIController extends CarController{
         pathFinder = new BreadthFirstSearchPathFinding(route);
         pathQueue = new LinkedList<>();
         strategy = new KeyPriorityStrategy(this.route, car, pathFinder);
-        //TODO: cuz we need a place to store the key!!
 //        myStrategy = new MyStrategy(car, route, keyList);
 
 	}
@@ -63,27 +61,36 @@ public class MyAIController extends CarController{
     */
 	@Override
 	public void update() {
-	    //TODO HANDLE LAVA AND WE ARE DONE YAYAYAYAYAYAYAYAYAYAYA
         /**
          *  Update the map based on the TRAP information given
          */
+//        System.out.println(getPosition());
         updateMap();
         Coordinate currentCoordinate = getCurrentCoordinate();
-        route.updateMap(currentCoordinate.x, currentCoordinate.y);
+
+
+
+        /**
+         * Taking the command enum and giving that command based on the enum
+         */
+        checkOncomingCollision();
+
 //        route.printGridMap();
         /**
          * Creating a command sequence to go to a certain point
          */
 //        if (commandsQueue.isEmpty() && !calculated)
         if (commandsQueue.isEmpty()){
-            // TODO just a simple case, need to be fixed
 
             /**
              * Generate the next coordinate the car should go through
              */
 			Coordinate destination =
                     strategy.decideNextCoordinate(currentCoordinate);
-//            System.out.println(destination.toString());
+
+
+
+            System.out.println(destination.toString());
             /**
              * Generate a list of coordinates that the car has to go through
              * using certain path finding calculation
@@ -111,10 +118,7 @@ public class MyAIController extends CarController{
 
 		}
 
-        /**
-         * Taking the command enum and giving that command based on the enum
-         */
-        checkOncomingCollision();
+
 
 		Commands nextCommand = commandsQueue.poll();
 		assert nextCommand != null;
@@ -221,16 +225,7 @@ public class MyAIController extends CarController{
                         accelerationApplied = true;
 						commandsQueue.add(Commands.REVERSE);
 
-					} else if (Arrays.equals(direction, UP_DIRECTION)){
-
-						commandsQueue.add(Commands.LEFT);
-						if (faceForward){
-							currentOrientation = WorldSpatial.Direction.NORTH;
-						} else {
-							currentOrientation = WorldSpatial.Direction.SOUTH;
-						}
-
-					} else if (Arrays.equals(direction, DOWN_DIRECTION)){
+					}  else if (Arrays.equals(direction, DOWN_DIRECTION)){
 
 						commandsQueue.add(Commands.RIGHT);
 						if (faceForward){
@@ -239,8 +234,17 @@ public class MyAIController extends CarController{
 							currentOrientation = WorldSpatial.Direction.NORTH;
 						}
 
-					} else if (accelerationApplied){
-					    commandsQueue.add(Commands.NONE);
+					} else if (Arrays.equals(direction, UP_DIRECTION)){
+
+                        commandsQueue.add(Commands.LEFT);
+                        if (faceForward){
+                            currentOrientation = WorldSpatial.Direction.NORTH;
+                        } else {
+                            currentOrientation = WorldSpatial.Direction.SOUTH;
+                        }
+
+                    } else if (accelerationApplied){
+                        commandsQueue.add(Commands.NONE);
                     }
                     break;
                 case WEST:
@@ -367,9 +371,16 @@ public class MyAIController extends CarController{
     private void updateMap() {
         HashMap<Coordinate, MapTile> currentView = getView();
         MapTile newTile, currentTile;
-
+//        System.out.println("The surroundings:");
         for(Coordinate coord : currentView.keySet()) {
             newTile = currentView.get(coord);
+
+            if(newTile.isType(MapTile.Type.TRAP) && newTile instanceof MudTrap){
+                route.blockCoordinate(coord.x, coord.y);
+            } else {
+                route.updateMap(coord);
+            }
+
 
             if(newTile.isType(MapTile.Type.TRAP)
                     && newTile instanceof LavaTrap

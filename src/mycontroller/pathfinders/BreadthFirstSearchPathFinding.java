@@ -1,6 +1,7 @@
 package mycontroller.pathfinders;
 
 import mycontroller.Route;
+import org.lwjgl.Sys;
 import utilities.Coordinate;
 import world.World;
 import world.WorldSpatial;
@@ -51,10 +52,10 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          */
 //        System.out.println(initialPossibleCoordinates.size());
         manipulateArray(initialPossibleCoordinates, destination);
-
-        if (!isReachable(destination)){
-            return UNREACHABLE;
-        }
+//        if (!isReachable(currentCoordinate, destination)){
+//            return UNREACHABLE;
+//        }
+        System.out.println("HERE");
 
 //        printDistArray();
         return backtrack(currentCoordinate, destination);
@@ -94,6 +95,17 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 //        System.out.println(nearestCoordinate.toString());
         return nearestCoordinate;
     }
+
+    @Override
+    public boolean isReachable(Coordinate currentCoordinate,
+                               Coordinate destination) {
+        List<Coordinate> initialCoordinate = new ArrayList<>();
+        initialCoordinate.add(currentCoordinate);
+        resetDistanceArray(currentCoordinate);
+        manipulateArray(initialCoordinate, destination);
+        return distanceArray[destination.y][destination.x] != Integer.MAX_VALUE;
+    }
+
 
     private void resetDistanceArray(Coordinate currentCoordinate){
         /**
@@ -160,9 +172,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
         return initialPossibleCoordinates;
     }
 
-    private boolean isReachable(Coordinate coordinate) {
-        return distanceArray[coordinate.y][coordinate.x] != Integer.MAX_VALUE;
-    }
 
     /**
      * Manipulating distance array to calculate the best path
@@ -172,7 +181,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
      */
     private void manipulateArray(List<Coordinate> possibleCoordinates,
                                  Coordinate destination){
-        //TODO something wrong with this
         boolean reachedDestination = false;
 
         if(possibleCoordinates.isEmpty()) return;

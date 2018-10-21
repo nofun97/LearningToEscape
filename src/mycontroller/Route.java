@@ -134,21 +134,27 @@ public class Route {
         blockFromSource(nextPossibleCoordinates);
     }
     //TODO This is a crude updateMap, will need more fixing
-    public void updateMap(int x, int y){
+    public void updateMap(Coordinate coordinate){
 //        this.buildMap();
+        int x = coordinate.x;
+        int y = coordinate.y;
         if(!isWithinMap(x, y) || gridMap[y][x] == BLOCKED){
             return;
         }
         // then set the gridMap's value into given value (which is 0 in this case)
         gridMap[y][x] += 1;
+    }
+
+    public boolean nextToAWall(Coordinate coordinate){
         for (int i = 0; i < PathFinder.NUM_OF_POSSIBLE_DIRECTION; i++) {
-            int nextX = x + PathFinder.DIRECTIONS_DELTA[i];
-            int nextY = y + PathFinder.DIRECTIONS_DELTA
+            int nextX = coordinate.x + PathFinder.DIRECTIONS_DELTA[i];
+            int nextY = coordinate.y + PathFinder.DIRECTIONS_DELTA
                     [(i+1)%PathFinder.NUM_OF_POSSIBLE_DIRECTION];
 
-            if(isWithinMap(nextX, nextY) && !isBlocked(nextX, nextY))
-                gridMap[nextY][nextX] += 1;
+            if(isWithinMap(nextX, nextY) && isBlocked(nextX, nextY))
+                return true;
         }
+        return false;
     }
 
     // check if there is a wall on which side.
