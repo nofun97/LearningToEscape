@@ -13,7 +13,7 @@ public interface State {
      * Gets nearest coordinate based on the state.
      *
      * @param currentCoordinate the current coordinate
-     * @param orientation the orientation
+     * @param orientation       the orientation
      * @return the nearest coordinate
      */
     Coordinate getCoordinate(Coordinate currentCoordinate,
@@ -24,12 +24,27 @@ public interface State {
      * Add important coordinate to each state.
      *
      * @param coordinate the coordinate
+     * @return the boolean
      */
     boolean offerImportantCoordinate(Coordinate coordinate);
 
+    /**
+     * Remove coordinate.
+     *
+     * @param coordinate the coordinate
+     */
     void removeCoordinate(Coordinate coordinate);
 
+    /**
+     * Check if a state is finished
+     *
+     * @return the boolean
+     */
     boolean isFinished();
 
-    int getSize();
+    /**
+     * Check if a tracked coordinate exists
+     * @return true if it exists and false otherwise
+     */
+    boolean isCoordinateExist();
 }

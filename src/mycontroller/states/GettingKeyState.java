@@ -1,41 +1,38 @@
 package mycontroller.states;
 
-import mycontroller.Route;
 import mycontroller.pathfinders.PathFinder;
-//import mycontroller.strategies.MyStrategy;
 import utilities.Coordinate;
-import world.Car;
 import world.WorldSpatial;
 
-import java.util.HashSet;
-import java.util.Set;
 
-
+/**
+ * The type of state that tracks keys.
+ */
 public class GettingKeyState extends CoordinateTrackerStates {
 
-    private Set<Coordinate> keyHistory;
-
-    public GettingKeyState(PathFinder pathFinder, Route route) {
-        super(pathFinder, route);
-        keyHistory = new HashSet<>();
+    /**
+     * Instantiates a new Getting key state.
+     *
+     * @param pathFinder the path finder
+     */
+    public GettingKeyState(PathFinder pathFinder) {
+        super(pathFinder);
     }
 
     @Override
     public boolean isFinished() {
-        return getSize() == 0;
+        return !isCoordinateExist();
     }
 
-    /*@Override
-    public void addImportantCoordinate(Coordinate coordinate) {
-        if(!keyHistory.contains(coordinate)){
-            keyHistory.add(coordinate);
-            super.addImportantCoordinate(coordinate);
-        }
-    }*/
 
     @Override
     public Coordinate getCoordinate(Coordinate currentCoordinate,
                                     WorldSpatial.Direction orientation) {
+
+        /**
+         * When a key coordinate is needed, a nearest coordinate is outputted
+         * and no longer to be tracked
+         */
         Coordinate nearestCoordinate = super.getCoordinate(currentCoordinate,
                 orientation);
         removeCoordinate(nearestCoordinate);

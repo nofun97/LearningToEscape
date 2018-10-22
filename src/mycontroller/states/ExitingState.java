@@ -1,37 +1,24 @@
 package mycontroller.states;
-import mycontroller.Route;
 import mycontroller.pathfinders.PathFinder;
-//import mycontroller.strategies.MyStrategy;
-import utilities.Coordinate;
-import world.Car;
 
-//package mycontroller.states;
-//
-//import utilities.Coordinate;
-//
-//public class ExitingState implements State{
-//    Coordinate exit;
-//
-//    public ExitingState() {
-//    }
-//
-//    @Override
-//    public Coordinate getNearestCoordinate(Coordinate currentCoordinate) {
-//        return exit;
-//    }
-//
-//    @Override
-//    public void addImportantCoordinate(Coordinate coordinate) {
-//        exit = coordinate;
-//    }
-//}
+/**
+ * The type state that records exits.
+ */
 public class ExitingState extends CoordinateTrackerStates {
-    public ExitingState(PathFinder pathFinder, Route route) {
-        super(pathFinder, route);
+    /**
+     * Instantiates a new Exiting state.
+     *
+     * @param pathFinder the path finder
+     */
+    public ExitingState(PathFinder pathFinder) {
+        super(pathFinder);
     }
 
     @Override
     public boolean isFinished() {
+        /**
+         * It can not finish
+         */
         return false;
     }
 }

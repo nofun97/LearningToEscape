@@ -12,14 +12,20 @@ import java.util.*;
  * The type Exploration method for the car.
  */
 public class ExplorationState implements State {
-    public static final Coordinate ALL_EXPLORED = null;
+    /**
+     * The constant that marks if a coordinate is unexplored
+     */
     public static final int UNEXPLORED = 0;
-    public static final int LEVELS_TO_SKIP = 2;
+
+    /**
+     * direction modifier
+     */
     private int modifier;
     private Route route;
     private boolean finished = false;
+
     /**
-     * a map that marks which coordinate has not been explored
+     * a map that marks which coordinate has or has not been explored
      */
     private int[][] explorationMap;
 
@@ -46,7 +52,6 @@ public class ExplorationState implements State {
          * initializing initial value
          */
         smallestValue = Integer.MAX_VALUE;
-//        printExplorationMap();
 
         /**
          * Finding the smallest value of the coordinate that has not been
@@ -78,15 +83,12 @@ public class ExplorationState implements State {
                 smallestValue = currentValue;
             }
         }
-//        System.out.println(smallestValue);
         /**
          * Initial possible coordinate which are the coordinates around the car
          */
         modifier = orientationPriorityModifier(orientation);
         Set<Coordinate> initialPossibleCoordinates = new LinkedHashSet<>();
         Set<Coordinate> addedCoordinates = new HashSet<>();
-//        int sourceX = currentCoordinate.x;
-//        int sourceY = currentCoordinate.y;
         addedCoordinates.add(currentCoordinate);
         initialPossibleCoordinates.add(currentCoordinate);
 
@@ -94,33 +96,35 @@ public class ExplorationState implements State {
         /**
          * Find the nearest unexplored spot
          */
-//        return findNearestUnexploredSpot(initialPossibleCoordinates,
-//                addedCoordinates);
-        Coordinate a = findNearestUnexploredSpot(initialPossibleCoordinates,
+        return findNearestUnexploredSpot(initialPossibleCoordinates,
                 addedCoordinates);
-
-//        printExplorationMap();
-//        System.out.println(a.toString());
-        return a;
     }
 
     @Override
     public boolean offerImportantCoordinate(Coordinate coordinate) {
+        /**
+         * There is no coordinates to track
+         */
         return false;
     }
 
     @Override
-    public int getSize() {
-        return 1;
+    public boolean isCoordinateExist() {
+        /**
+         * There's always coordinate to explore
+         */
+        return true;
     }
 
     @Override
     public void removeCoordinate(Coordinate coordinate) {
-        ;
+        /**
+         * There is nothing to remove
+         */
     }
 
     /**
-     * A priority modifier for finding unexplore spots, the integer returned
+     * A priority modifier for finding unexplored spots, the integer returned
      * adds a number that will push the starting values of the PathFinder
      * .DIRECTIONS_DELTA
      * @param orientation current orientation of the car
@@ -139,11 +143,12 @@ public class ExplorationState implements State {
         }
         return 0;
     }
+
     /**
      * Find nearest unexplored coordinate.
      *
      * @param possibleCoordinate the possible coordinate
-     * @param addedCoordinates to record coordinates that has been checked
+     * @param addedCoordinates   to record coordinates that has been checked
      * @return the nearest unexplored coordinate
      */
     public Coordinate findNearestUnexploredSpot(Set<Coordinate>
@@ -151,13 +156,11 @@ public class ExplorationState implements State {
                                                 Set<Coordinate>
                                                         addedCoordinates){
         Set<Coordinate> nextPossibleCoordinate = new LinkedHashSet<>();
+
         /**
          * Iterate through the possible coordinates and adding the next
          * possible coordinates
          */
-//        System.out.println(possibleCoordinate.size());
-
-
         for (Coordinate currentCoordinate: possibleCoordinate) {
 
             /**
@@ -174,17 +177,23 @@ public class ExplorationState implements State {
                     int index2 =
                             (i + modifier + 1) %
                                     PathFinder.NUM_OF_POSSIBLE_DIRECTION;
-//                int index1 = i;
-//                int index2 = (i+1)%PathFinder.NUM_OF_POSSIBLE_DIRECTION;
                 int nextX = currentX + PathFinder.DIRECTIONS_DELTA[index1];
                 int nextY = currentY + PathFinder.DIRECTIONS_DELTA[index2];
                 Coordinate coordinate = new Coordinate(nextX, nextY);
-
+                /**
+                 * Ignore values outside the map
+                 */
                 if(!Route.isWithinMap(nextX, nextY)) continue;
-//                System.out.printf("%2d %2d\n", nextX, nextY);
+
+                /**
+                 * If the nearest unexplored coordinate is found, it is
+                 * returned, if not, its surroundings will be processed
+                 */
                 if(explorationMap[nextY][nextX] == smallestValue &&
                         !route.toAvoid(coordinate)){
+
                     return new Coordinate(nextX, nextY);
+
                 } else if (!route.isBlocked(nextX, nextY) &&
                         !addedCoordinates.contains(coordinate)){
                     /**
@@ -193,6 +202,7 @@ public class ExplorationState implements State {
                      */
 
                     nextPossibleCoordinate.add(coordinate);
+
                     /**
                      * Record checked coordinates
                      */
@@ -202,10 +212,6 @@ public class ExplorationState implements State {
 
             }
         }
-
-//        printExplorationMap();
-//        System.out.println("SIZE: "+nextPossibleCoordinate.size());
-//        printExplorationMap();
         /**
          * checking the neighbouring coordinates of the next possible
          * coordinates
@@ -216,6 +222,10 @@ public class ExplorationState implements State {
 
     @Override
     public boolean isFinished() {
+        /**
+         * This state is finished when there is no more unexplored coordinates
+         */
+
         if(finished) return true;
         for (int[] row: explorationMap){
             if(Arrays.stream(row).anyMatch(x -> x == UNEXPLORED)){
@@ -226,6 +236,9 @@ public class ExplorationState implements State {
         return true;
     }
 
+    /**
+     * Prints the exploration map
+     */
     private void printExplorationMap(){
         for (int i = World.MAP_HEIGHT - 1; i >= 0; i--) {
             int[] x = explorationMap[i];

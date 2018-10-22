@@ -13,12 +13,28 @@ import java.util.List;
  * The PathFinder that uses the Breadth First Search Algorithm.
  */
 public class BreadthFirstSearchPathFinding implements PathFinder{
+    /**
+     * Dummy values, to be put in manipulateArray so that it process the
+     * distance to every coordinates
+     */
+    private static final Coordinate PROCESS_EVERYTHING =
+            new Coordinate(-1,-1);
+
+    /**
+     * To mark a coordinate as has not been reached
+     */
+    private static final int NOT_REACHED = Integer.MAX_VALUE;
 
     /**
      * distanceArray is used to execute the algorithm
      */
     private int[][] distanceArray;
+
     private Route route;
+
+    /**
+     * Dictates whether to avoid the traps or not
+     */
     private boolean avoidTrap;
 
     /**
@@ -47,12 +63,21 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
         List<Coordinate> initialPossibleCoordinates =
                 calculateInitialPossibleCoordinate
                         (currentCoordinate, orientation);
-//        List<Coordinate> path = new ArrayList<>();
+
+        /**
+         * Manipulating distArray based on avoidTrap
+         */
         if(avoidTrap){
             manipulateArray(initialPossibleCoordinates, destination);
+
+            /**
+             * Should the coordinate, after processing, is found as unreachable,
+             * it recalculates everything again with the exception of being
+             * able to go through the trap. This happens when the only way to
+             * get to the destination is through the trap.
+             */
             if(!isReachable(destination)) {
                 this.avoidTrap = false;
-                System.out.println("IT WENT HERE");
                 resetDistanceArray(currentCoordinate);
                 initialPossibleCoordinates = calculateInitialPossibleCoordinate
                         (currentCoordinate, orientation);
@@ -63,27 +88,11 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
             manipulateArray(initialPossibleCoordinates, destination);
         }
-        printDistArray();
-        return backtrack(currentCoordinate, destination);
 
         /**
-         * Manipulate array to calculate best path
+         * returning the processed path
          */
-//        System.out.println(initialPossibleCoordinates.size());
-//        manipulateArray(initialPossibleCoordinates, destination, avoidTrap);
-//        if (!isReachable(currentCoordinate, destination)){
-//            return UNREACHABLE;
-//        }
-//        System.out.println("HERE");
-
-//        printDistArray();
-//        return backtrack(currentCoordinate, destination);
-        /*List<Coordinate> x = backtrack(currentCoordinate, destination);
-//        for (Coordinate a :
-//                x) {
-//            System.out.println(a.toString());
-//        }
-        return x;*/
+        return backtrack(currentCoordinate, destination);
     }
 
     @Override
@@ -92,62 +101,118 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                                             WorldSpatial.Direction orientation,
                                             List<Coordinate>
                                                         unreachableCoordinates){
+
         Coordinate nearestCoordinate = null;
+
+        /**
+         * resetting distArray values
+         */
         resetDistanceArray(currentCoordinate);
+
+        /**
+         * initial values
+         */
         int minimumDistance = Integer.MAX_VALUE;
         List<Coordinate> initialPossibleCoordinates =
                 calculateInitialPossibleCoordinate
                         (currentCoordinate, orientation);
 
-        manipulateArray(initialPossibleCoordinates,
-                new Coordinate(-1, -1));
-//        printDistArray();
+        /**
+         * Calculates distances to every coordinates from source
+         */
+        manipulateArray(initialPossibleCoordinates, PROCESS_EVERYTHING);
+
+        /**
+         * Finding the coordinate with the smallest distance
+         */
         for(Coordinate coordinate: coordinates){
             int x = coordinate.x;
             int y = coordinate.y;
-//            if(minimumDistance == distanceArray[y][x]){
-//                System.out.println(coordinate.toString());
-//            }
 
-            if(distanceArray[y][x] == Integer.MAX_VALUE) {
+            /**
+             * Should it be unreachable, it is blocked and added to the
+             * unreachable coordinates list
+             */
+            if(!isReachable(new Coordinate(x, y))) {
+
+                /**
+                 * Marking the coordinate and blocking it so that it is not
+                 * calculated again
+                 */
                 unreachableCoordinates.add(coordinate);
                 route.blockFromSource(x, y);
             } else if(minimumDistance > distanceArray[y][x]){
+
+                /**
+                 * Updating the nearest coordinates
+                 */
                 minimumDistance = distanceArray[y][x];
                 nearestCoordinate = coordinate;
             }
         }
-//        System.out.println(nearestCoordinate.toString());
+
         return nearestCoordinate;
     }
 
-    public boolean isReachable(Coordinate destination) {
-        return distanceArray[destination.y][destination.x] != Integer.MAX_VALUE;
+    /**
+     * To check whether a coordinate is reachable, can only be used after
+     * manipulateArray.
+     *
+     * @param destination the coordinate to check
+     * @return true if a coordinate is reachable and false otherwise
+     */
+    private boolean isReachable(Coordinate destination) {
+
+        /**
+         * If after manipulationArray, the coordinate's distance value is not
+         * updated, then it is unreachable
+         */
+        return distanceArray[destination.y][destination.x] != NOT_REACHED;
     }
 
-
+    /**
+     * Resetting distance array values
+     * @param currentCoordinate the current coordinate of the car
+     */
     private void resetDistanceArray(Coordinate currentCoordinate){
         /**
          * Assigning every coordinate as very far except the starting point
          */
         for (int i = 0; i < World.MAP_HEIGHT; i++) {
             for (int j = 0; j < World.MAP_WIDTH; j++) {
-                distanceArray[i][j] = Integer.MAX_VALUE;
+                distanceArray[i][j] = NOT_REACHED;
             }
         }
 
         distanceArray[currentCoordinate.y][currentCoordinate.x] = 0;
     }
 
+    /**
+     * Based on the current coordinate and the car orientation, the method
+     * dictates the first coordinates the car can reach and therefore which
+     * values to update in distArray.
+     * @param currentCoordinate the current coordinate of the car
+     * @param orientation the orientation of the car
+     * @return a list of initial possible coordinates
+     */
     private List<Coordinate> calculateInitialPossibleCoordinate
             (Coordinate currentCoordinate,  WorldSpatial.Direction orientation){
         ArrayList<Coordinate> initialPossibleCoordinates = new ArrayList<>();
 
+        /**
+         * Based on the orientation, the first coordinates a car can reach
+         * are either the one in front of it, the one behind it, or both.
+         */
         if (orientation == WorldSpatial.Direction.EAST ||
                 orientation == WorldSpatial.Direction.WEST){
             int possibleX1 = currentCoordinate.x + 1;
             int possibleX2 = currentCoordinate.x - 1;
             int possibleY = currentCoordinate.y;
+
+            /**
+             * Should it be a valid coordinate that a car can pass through it
+             * is added to the possible coordinates
+             */
             if(Route.isWithinMap(possibleX1, possibleY) &&
                     !route.isBlocked(possibleX1, possibleY) &&
                     (!avoidTrap || !route.toAvoid(new Coordinate
@@ -209,6 +274,10 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
     private void manipulateArray(List<Coordinate> possibleCoordinates,
                                  Coordinate destination){
         boolean reachedDestination = false;
+
+        /**
+         * When there is no more possible coordinates to update, it finishes
+         */
         if(possibleCoordinates.isEmpty()) return;
 
         /**
@@ -216,23 +285,17 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          * values to be updated
          */
         ArrayList<Coordinate> nextPossibleCoordinates = new ArrayList<>();
-//        System.out.println(possibleCoordinates.size());
-        /*System.out.printf("This is the destination: %2d,%2d\n", destination.x
-                , destination.y);
-        System.out.println("These are the sources");*/
-//        for(Coordinate coordinate: possibleCoordinates){
-//            System.out.println(coordinate.toString());
-//        }
 
+        /**
+         * iterate through coordinates and update their surrounding coordinates
+         */
         for (Coordinate coordinate: possibleCoordinates){
             /**
              * Convert the array into index
              */
             int sourceX = coordinate.x;
             int sourceY = coordinate.y;
-            /*if (sourceX == 16 && sourceY == 3) System.out.println("IT WAS " +
-                    "DEAD");
-            System.out.printf("From source: %2d,%2d\n", sourceX, sourceY);*/
+
             /**
              * Update the surrounding values should it fulfill the conditions
              */
@@ -254,17 +317,9 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                 }
 
                 /**
-                 * Update the distance values should a faster way to reach there
-                 * is faster and if it is not a wall
+                 * Update the distance values should it be faster, not a
+                 * wall and if it must avoid a trap, it is not a trap
                  */
-
-//                /*System.out.printf("Updating %2d,%2d from source %2d,%2d with " +
-//                                "value %2d < %2d and " +
-//                                "it is " +
-//                        "%s\n", nextX, nextY, sourceX, sourceY,
-//                        distanceArray[sourceY][sourceX] + DISTANCE,
-//                        distanceArray[nextY][nextX],
-//                        !route.isBlocked(nextX, nextY) ? "not blocked":"blocked");*/
 
                 if(!route.isBlocked(nextX, nextY) &&
                         distanceArray[sourceY][sourceX] + DISTANCE <

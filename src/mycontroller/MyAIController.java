@@ -4,11 +4,8 @@ import controller.CarController;
 import mycontroller.pathfinders.BreadthFirstSearchPathFinding;
 import mycontroller.pathfinders.PathFinder;
 import mycontroller.strategies.KeyPriorityStrategy;
-//import mycontroller.strategies.MyStrategy;
 import mycontroller.strategies.StrategyFactory;
-import tiles.HealthTrap;
-import tiles.LavaTrap;
-import tiles.MudTrap;
+import tiles.*;
 import utilities.Coordinate;
 import world.Car;
 import world.WorldSpatial;
@@ -17,70 +14,80 @@ import java.util.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import tiles.MapTile;
 
-
+/**
+ * The type My ai controller.
+ */
 public class MyAIController extends CarController{
-	private enum Commands {FORWARD, REVERSE, LEFT, RIGHT, BRAKE, NONE}
+	private enum Commands {
+        /**
+         * Forward commands.
+         */
+        FORWARD,
+        /**
+         * Reverse commands.
+         */
+        REVERSE,
+        /**
+         * Left commands.
+         */
+        LEFT,
+        /**
+         * Right commands.
+         */
+        RIGHT,
+        /**
+         * Brake commands.
+         */
+        BRAKE,
+        /**
+         * None commands.
+         */
+        NONE}
+
+
     private ArrayList<Coordinate> recordCoordinate = new ArrayList<>();
 	private Queue<Commands> commandsQueue = new LinkedList<>();
 	private Queue<Coordinate> pathQueue;
 	private StrategyFactory strategy;
-//	private MyStrategy myStrategy;
-    public static final int BLOCK = -1;
-    //TODO: just give a threshold
-    public static final int healthLimit = 90;
-//	private StrategyFactory strategy = new KeyPriorityStrategy();
 
-	// to store how many keys already got
-    private ArrayList<Coordinate> keyList = new ArrayList<>();
     private HashMap<Coordinate, MapTile> map = super.getMap();
     private PathFinder pathFinder;
 
-    // How many minimum units the wall is away from the player.
-    private int wallSensitivity = 1;
-
-    // This is set to true when the car starts sticking to a wall.
-    private boolean isFollowingWall = false;
     private Route route;
-//    private boolean calculated = false;
+
+    /**
+     * Instantiates a new My ai controller.
+     *
+     * @param car the car
+     */
 	public MyAIController(Car car) {
 		super(car);
-        route = new Route(map, super.getPosition());
+        route = new Route(map);
         pathFinder = new BreadthFirstSearchPathFinding(route);
         pathQueue = new LinkedList<>();
         strategy = new KeyPriorityStrategy(this.route, car, pathFinder);
-//        myStrategy = new MyStrategy(car, route, keyList);
 
 	}
 
-	/**
-     * basic idea: view and gain the TRAP information
-     * then use the info to recover the original map
-     * finally use DFS/Dijkstra to get all keys then exit.(?????????????????????????????????NOVAN REALLY?????)
-    */
 	@Override
 	public void update() {
         /**
          *  Update the map based on the TRAP information given
          */
-//        System.out.println(getPosition());
         updateMap();
-//        route.printGridMap();
+
         Coordinate currentCoordinate = getCurrentCoordinate();
 
 
 
         /**
-         * Taking the command enum and giving that command based on the enum
+         * Checking if collision is imminent, commands are interrupted and
+         * the car brakes
          */
         checkOncomingCollision();
 
-//        route.printGridMap();
-        /**
-         * Creating a command sequence to go to a certain point
-         */
-//        if (commandsQueue.isEmpty() && !calculated)
+
         if ( commandsQueue.isEmpty()){
 
             /**
@@ -90,8 +97,6 @@ public class MyAIController extends CarController{
                     strategy.decideNextCoordinate(currentCoordinate);
 
 
-            System.out.println(destination.toString());
-//            System.out.println("Here is the desination: "+destination.toString());
             /**
              * Generate a list of coordinates that the car has to go through
              * using certain path finding calculation
@@ -101,18 +106,25 @@ public class MyAIController extends CarController{
                             (currentCoordinate, destination, getOrientation(),
                                     strategy.avoidTrap());
 
+            /**
+             * If a path is defined as unreachable, the coordinate is blocked
+             * and the path is recalculated until a reachable path is found
+             */
             while(path == PathFinder.UNREACHABLE){
                 route.blockFromSource(destination.x, destination.y);
                 destination =  strategy.decideNextCoordinate(currentCoordinate);
-
-//                System.out.println("HERE");
 
                 path = pathFinder.findBestPath
                         (currentCoordinate, destination, getOrientation(),
                                 strategy.avoidTrap());
             }
+
+            /**
+             * Coordinates queue for checkOncomingCollision
+             */
             pathQueue = new LinkedList<>(path);
             pathQueue.poll();
+
             /**
              * Converting a list of coordinates into commands based on the car
              * condition
@@ -122,8 +134,10 @@ public class MyAIController extends CarController{
 		}
 
 
-
-		Commands nextCommand = commandsQueue.poll();
+        /**
+         * Based on the next command in the queue, a command is given to the car
+         */
+        Commands nextCommand = commandsQueue.poll();
 		assert nextCommand != null;
 		switch (nextCommand){
 			case LEFT:
@@ -152,7 +166,7 @@ public class MyAIController extends CarController{
      * Check the next coordinate where the car will head to and it will stop
      * should it be a trap that kills or a wall
      */
-	public void checkOncomingCollision(){
+    public void checkOncomingCollision(){
 	    Coordinate nextPath = pathQueue.poll();
 	    if (nextPath != null && route.isBlocked(nextPath.x, nextPath.y)){
 	        commandsQueue = new LinkedList<>();
@@ -165,9 +179,10 @@ public class MyAIController extends CarController{
      * setCommandSequence takes a list of coordinates that the car has to go
      * through and turns it into a list of commands the car has to do to reach
      * that point
+     *
      * @param coordinates the list of coordinates
      */
-	public void setCommandSequence(List<Coordinate> coordinates){
+    public void setCommandSequence(List<Coordinate> coordinates){
         /**
          * Get current coordinates and current orientation
          */
@@ -369,144 +384,73 @@ public class MyAIController extends CarController{
         commandsQueue.add(Commands.BRAKE);
     }
 
-    // LOOK AT THISSSSSS!!!!!!!! VERY IMPORTANT!!!!!
-    // update the view of the car (replace the normal tile with trap tile if given)
+    /**
+     * updateMap updates the traps found in the car's view and include these
+     * information in the map data and Route's gridMap
+     */
     private void updateMap() {
+
+        /**
+         * Getting and iterating through the tiles that the car has viewed
+         */
         HashMap<Coordinate, MapTile> currentView = getView();
         MapTile newTile, currentTile;
-//        System.out.println("The surroundings:");
         for(Coordinate coord : currentView.keySet()) {
             newTile = currentView.get(coord);
 
+            /**
+             * Updating the Route.gridMap based on the types of tile
+             */
             if(newTile.isType(MapTile.Type.TRAP) && newTile instanceof MudTrap){
+
+                /**
+                 * MudTraps are blocked
+                 */
                 route.blockCoordinate(coord.x, coord.y);
             } else if (newTile.isType(MapTile.Type.TRAP) &&
-                    newTile instanceof LavaTrap){
+                    (newTile instanceof LavaTrap ||
+                            newTile instanceof GrassTrap)){
+
+                /**
+                 * Lava trap and grass traps are to be avoided unless necessary
+                 */
                 route.setToAvoid(coord.x, coord.y);
             } else {
+                /**
+                 * Otherwise update the coordinates as explored
+                 */
                 route.updateMap(coord);
             }
 
 
+            /**
+             * Based on the trap tiles, the important data that strategy
+             * needs are updated
+             */
             if(newTile.isType(MapTile.Type.TRAP)
                     && newTile instanceof LavaTrap
                     && ((LavaTrap) newTile).getKey() > 0){
-                strategy.updateData(coord, StrategyFactory.IMPORTANT_DATA.KEY);
+                strategy.updateData(coord, StrategyFactory.importantData.KEY);
             } else if (newTile.isType(MapTile.Type.TRAP) &&
                     newTile instanceof HealthTrap){
                 strategy.updateData
-                        (coord, StrategyFactory.IMPORTANT_DATA.HEALING);
+                        (coord, StrategyFactory.importantData.HEALING);
             } else if (newTile.isType(MapTile.Type.FINISH)){
-                strategy.updateData(coord, StrategyFactory.IMPORTANT_DATA.EXIT);
+                strategy.updateData(coord, StrategyFactory.importantData.EXIT);
             }
 
-
+            /**
+             * Updating the maps
+             */
             Coordinate tmp = new Coordinate(coord.x, coord.y);
             currentTile = map.get(tmp);
             if(currentTile != null && newTile.getType() != currentTile.getType()
                     & !recordCoordinate.contains(coord)) {
-                //TODO: WE NEED TO DO something to handle the trap, (avoid, gotKey or goToHeal?????????)then mark it as
-                //TODO: handled, no need to handle this point agiannnnnn.
                 map.put(tmp, newTile);
                 recordCoordinate.add(coord);
-//                handleTheTrap(coord, map.get(coord));
             }
         }
     }
-
-
-   /* public void handleTheTrap(Coordinate coordinate, MapTile mapTile){
-        if (mapTile instanceof MudTrap){
-            int[][] tempMap = route.getGridMap();
-            tempMap[coordinate.y][coordinate.x] = BLOCK;
-            // TODO: strategy, implement avoid
-        }
-        //TODO: if there is a LAVA, based on the condition(do we have any keys?)
-        else if(mapTile instanceof LavaTrap){
-            // if we already have at least one key
-            if(((LavaTrap)mapTile).getKey() != 0){
-                //TODO: dont know should put which condition)
-//                if(){
-//                    myStrategy.gettingKey(coordinate);
-//                }
-//                // else just record the keys location
-//                else{
-//                    keyList.add(coordinate);
-//                }
-                return;
-            }
-            else if(mapTile instanceof HealthTrap){
-                if(super.getHealth() <= healthLimit){
-                    myStrategy.getHealing(coordinate);
-                    return;
-                }
-            }
-        }
-    }*/
-
-    /**
-     * Turn the car anti-clockwise
-     */
-    private void applyLeftTurn(WorldSpatial.Direction orientation) {
-        switch(orientation) {
-            case EAST:
-                if(!getOrientation().equals(WorldSpatial.Direction.NORTH)) {
-                    turnLeft();
-                }
-                break;
-            case NORTH:
-                if(!getOrientation().equals(WorldSpatial.Direction.WEST)) {
-                    turnLeft();
-                }
-                break;
-            case SOUTH:
-                if(!getOrientation().equals(WorldSpatial.Direction.EAST)) {
-                    turnLeft();
-                }
-                break;
-            case WEST:
-                if(!getOrientation().equals(WorldSpatial.Direction.SOUTH)) {
-                    turnLeft();
-                }
-                break;
-            default:
-                break;
-
-        }
-    }
-
-    /**
-     * Turn the car clockwise
-     */
-    private void applyRightTurn(WorldSpatial.Direction orientation) {
-        switch(orientation) {
-            case EAST:
-                if(!getOrientation().equals(WorldSpatial.Direction.SOUTH)) {
-                    turnRight();
-                }
-                break;
-            case NORTH:
-                if(!getOrientation().equals(WorldSpatial.Direction.EAST)) {
-                    turnRight();
-                }
-                break;
-            case SOUTH:
-                if(!getOrientation().equals(WorldSpatial.Direction.WEST)) {
-                    turnRight();
-                }
-                break;
-            case WEST:
-                if(!getOrientation().equals(WorldSpatial.Direction.NORTH)) {
-                    turnRight();
-                }
-                break;
-            default:
-                break;
-
-        }
-
-    }
-
 
     /**
      * Converting position from string into a coordinate

@@ -12,7 +12,6 @@ public class KeyPriorityStrategy implements StrategyFactory {
     private boolean healCommences = false;
     private boolean interrupt = false;
     private Route route;
-//    private Coordinate lastCoordinate;
     private State explore, heal, getKey, exit;
     private Car car;
 
@@ -20,56 +19,73 @@ public class KeyPriorityStrategy implements StrategyFactory {
         this.route = route;
         this.car = car;
         this.explore = new ExplorationState(this.route);
-        this.heal = new HealingState(pathFinder, route, car);
-        this.getKey = new GettingKeyState(pathFinder, route);
-//        this.lastCoordinate = new Coordinate(-1, -1);
-        this.exit = new ExitingState(pathFinder, route);
+        this.heal = new HealingState(pathFinder, car);
+        this.getKey = new GettingKeyState(pathFinder);
+        this.exit = new ExitingState(pathFinder);
     }
 
     @Override
     public Coordinate decideNextCoordinate(Coordinate currentCoordinate) {
+
+        /**
+         * Based on the strategy, it determines the state a car should be in
+         */
         State currentState = null;
         avoidTrap = false;
+
+        /**
+         * Keep healing until heal state is finished
+         */
         if(healCommences){
             currentState = heal;
             if(heal.isFinished()){
               healCommences = false;
           }
         } else if(!healCommences &&
-                car.getHealth() <= MINIMUM_HEALTH && heal.getSize() > 0){
-            System.out.println("Healing");
+                car.getHealth() <= MINIMUM_HEALTH && heal.isCoordinateExist()){
+
+            /**
+             * Heal when car is low on health and a heal tile exists
+             */
             currentState = heal;
             healCommences = true;
-        } else if(car.getKeys().size() == car.numKeys && exit.getSize() > 0){
-            System.out.println("Exiting");
+        } else if(car.getKeys().size() == car.numKeys &&
+                exit.isCoordinateExist()){
+
+            /**
+             * Exit when all the keys are found and an exit tile exists
+             */
             currentState = exit;
-        }  else if (car.getHealth() > MINIMUM_HEALTH &&  getKey.getSize() > 0){
-            System.out.println("Get Keys");
+        }  else if (car.getHealth() > MINIMUM_HEALTH &&
+                getKey.isCoordinateExist()){
+
+            /**
+             * Only get key when the car's health is above certain threshold
+             */
             currentState = getKey;
         } else if (!healCommences){
-            System.out.println("Dora Dora Dora the Explorer");
+
+            /**
+             * If it is not healing, it must explore
+             */
             avoidTrap = car.getHealth() < StrategyFactory.MINIMUM_HEALTH;
             currentState = explore;
         }
 
-//        route.printGridMap();
-        assert currentState != null;
+        /**
+         * Based on the states, the next coordinate is determined
+         */
         Coordinate nextCoordinate =
                 currentState.getCoordinate(currentCoordinate,
                         car.getOrientation());
 
+        /**
+         * If there is no nextCoordinate, the process is repeated
+         */
         if(nextCoordinate == null) {
             return decideNextCoordinate(currentCoordinate);
         }
-//        System.out.println(nextCoordinate.toString());
-/*      if (lastCoordinate == nextCoordinate){
-            route.blockCoordinate(lastCoordinate.x, lastCoordinate.y);
-            nextCoordinate =
-                    currentState.getCoordinate(currentCoordinate, null);
-        }
-        recordCoordinate(nextCoordinate);*/
-//        assert nextCoordinate != null;
-//        System.out.println(nextCoordinate.toString());
+
         return nextCoordinate;
     }
 
@@ -79,7 +95,11 @@ public class KeyPriorityStrategy implements StrategyFactory {
     }
 
     @Override
-    public void updateData(Coordinate coordinate, IMPORTANT_DATA type) {
+    public void updateData(Coordinate coordinate, importantData type) {
+
+        /**
+         * Adding the data to certain states based on the type
+         */
         State trackerStates = null;
         switch (type){
             case KEY:
@@ -95,21 +115,11 @@ public class KeyPriorityStrategy implements StrategyFactory {
         assert trackerStates != null;
         boolean accepted = trackerStates.offerImportantCoordinate(coordinate);
 
-        interrupt = accepted && type == IMPORTANT_DATA.KEY;
+        interrupt = accepted && type == importantData.KEY;
     }
 
     @Override
     public boolean interrupt(){
         return interrupt;
     }
-
-//    public void recordCoordinate(Coordinate newCoordinate){
-//        this.lastCoordinate = newCoordinate;
-//    }
-
-//    public void checkUnreachableCoordinate(Coordinate newCoordinate){
-//        if (newCoordinate == lastCoordinate){
-//            route.blockCoordinate(lastCoordinate.x, lastCoordinate.y);
-//        }
-//    }
 }
