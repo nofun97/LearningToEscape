@@ -3,6 +3,7 @@ package mycontroller.strategies;
 import mycontroller.Route;
 import mycontroller.pathfinders.PathFinder;
 import mycontroller.states.*;
+import org.lwjgl.Sys;
 import utilities.Coordinate;
 import world.Car;
 
@@ -43,7 +44,6 @@ public class KeyPriorityStrategy implements StrategyFactory {
           }
         } else if(!healCommences &&
                 car.getHealth() <= MINIMUM_HEALTH && heal.isCoordinateExist()){
-
             /**
              * Heal when car is low on health and a heal tile exists
              */
@@ -51,24 +51,22 @@ public class KeyPriorityStrategy implements StrategyFactory {
             healCommences = true;
         } else if(car.getKeys().size() == car.numKeys &&
                 exit.isCoordinateExist()){
-
             /**
              * Exit when all the keys are found and an exit tile exists
              */
             currentState = exit;
-        }  else if (car.getHealth() > MINIMUM_HEALTH &&
+        }  else if ((!heal.isCoordinateExist() ||
+                car.getHealth() > MINIMUM_HEALTH) &&
                 getKey.isCoordinateExist()){
-
             /**
              * Only get key when the car's health is above certain threshold
              */
             currentState = getKey;
         } else if (!healCommences){
-
             /**
              * If it is not healing, it must explore
              */
-            avoidTrap = car.getHealth() < StrategyFactory.MINIMUM_HEALTH;
+            avoidTrap = true;
             currentState = explore;
         }
 

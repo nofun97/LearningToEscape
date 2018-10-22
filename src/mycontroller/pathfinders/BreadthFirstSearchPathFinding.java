@@ -118,9 +118,12 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                         (currentCoordinate, orientation);
 
         /**
-         * Calculates distances to every coordinates from source
+         * Calculates distances to every coordinates from source, turning off
+         * the avoid trap
          */
+        avoidTrap = false;
         manipulateArray(initialPossibleCoordinates, PROCESS_EVERYTHING);
+        avoidTrap = true;
 
         /**
          * Finding the coordinate with the smallest distance
@@ -383,7 +386,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          */
         while(currentX != startingCoordinate.x ||
                 currentY != startingCoordinate.y){
-//            System.out.printf("%2d %2d\n", currentX, currentY);
             /**
              * Checking the surroundings
              */
@@ -403,7 +405,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                         || nextY >= World.MAP_HEIGHT){
                     continue;
                 }
-//                System.out.println("HERE");
                 /**
                  * Should the value of the current coordinate be higher than
                  * the neighouring values, the path is added. As the
@@ -413,7 +414,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                 if(distanceArray[currentY][currentX] -
                         distanceArray[nextY][nextX] == DISTANCE){
                     path.add(new Coordinate(nextX, nextY));
-//                    System.out.printf("%d %d\n", currentX, currentY);
                     /**
                      * Change the currently processed coordinate
                      */
