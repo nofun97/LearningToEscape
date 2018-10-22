@@ -25,7 +25,7 @@ public interface PathFinder {
      * The constant DIRECTIONS_DELTA, used to calculate possible next
      * coordinates surrounding the source coordinate.
      */
-    int[] DIRECTIONS_DELTA = new int[]{0, 1, 0, -1};
+    int[] DIRECTIONS_DELTA = new int[]{1, 0, -1, 0};
 
     List<Coordinate> UNREACHABLE = null;
 
@@ -40,17 +40,20 @@ public interface PathFinder {
      */
     List<Coordinate> findBestPath(Coordinate currentCoordinate,
                                   Coordinate destination,
-                                  WorldSpatial.Direction orientation);
+                                  WorldSpatial.Direction orientation,
+                                  boolean avoidTrap);
 
     /**
-     * Find the nearest coordinate from a list of coordinates
+     * Find the nearest coordinate from a list of coordinates and detects the
+     * unreachable coordinates should it exists
      * @param coordinates the list of coordinates
      * @param currentCoordinate the current coordinate of the car
-     * @return
+     * @return nearest coordinate
      */
     Coordinate findNearestCoordinate(List<Coordinate> coordinates,
                                      Coordinate currentCoordinate,
-                                     WorldSpatial.Direction orientation);
+                                     WorldSpatial.Direction orientation,
+                                     List<Coordinate>
+                                             unreachableCoordinates);
 
-    boolean isReachable(Coordinate currentCoordinate, Coordinate destination);
 }

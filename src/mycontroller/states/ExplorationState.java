@@ -60,7 +60,8 @@ public class ExplorationState implements State {
                  * Finding minimum value of a row
                  */
                 currentValue = Arrays.stream(row)
-                                    .filter(value -> value != Route.BLOCKED)
+                                    .filter(value -> value != Route.BLOCKED &&
+                                            value != Route.TO_AVOID)
                                     .min()
                                     .getAsInt();
             } catch (NoSuchElementException e){
@@ -88,23 +89,6 @@ public class ExplorationState implements State {
 //        int sourceY = currentCoordinate.y;
         addedCoordinates.add(currentCoordinate);
         initialPossibleCoordinates.add(currentCoordinate);
-//        for (int i = 0; i < PathFinder.NUM_OF_POSSIBLE_DIRECTION; i++) {
-//            int index1 = (i + modifier) % PathFinder.NUM_OF_POSSIBLE_DIRECTION;
-//            int index2 =
-//                    (i + modifier + 1) %
-//                            PathFinder.NUM_OF_POSSIBLE_DIRECTION;
-//            int nextX = sourceX + PathFinder.DIRECTIONS_DELTA[index1];
-//            int nextY = sourceY + PathFinder.DIRECTIONS_DELTA[index2];
-//            Coordinate coordinate = new Coordinate(nextX, nextY);
-//
-//            if (!Route.isWithinMap(nextX, nextY) || explorationMap[nextY][nextX]
-//                    == Route.BLOCKED || addedCoordinates.contains(coordinate) )
-//                continue;
-//
-//            initialPossibleCoordinates.add(coordinate);
-//            addedCoordinates.add(coordinate);
-//        }
-//        System.out.println(initialPossibleCoordinates.size());
 
 
         /**
@@ -115,14 +99,14 @@ public class ExplorationState implements State {
         Coordinate a = findNearestUnexploredSpot(initialPossibleCoordinates,
                 addedCoordinates);
 
-        printExplorationMap();
+//        printExplorationMap();
 //        System.out.println(a.toString());
         return a;
     }
 
     @Override
-    public void addImportantCoordinate(Coordinate coordinate) {
-        ;
+    public boolean offerImportantCoordinate(Coordinate coordinate) {
+        return false;
     }
 
     @Override
@@ -173,17 +157,6 @@ public class ExplorationState implements State {
          */
 //        System.out.println(possibleCoordinate.size());
 
-        /**
-         * When there is no more possible coordinates it will return null
-         * value as everything is explored
-         */
-
-        //TODO this needs to be handled by strategy
-//        if (possibleCoordinate.isEmpty()){
-//            finished = true;
-//            return ALL_EXPLORED;
-//        }
-
 
         for (Coordinate currentCoordinate: possibleCoordinate) {
 
@@ -196,23 +169,23 @@ public class ExplorationState implements State {
             int currentY = currentCoordinate.y;
 
             for (int i = 0; i < PathFinder.NUM_OF_POSSIBLE_DIRECTION; i++) {
-//                    int index1 = (i + modifier) %
-//                            PathFinder.NUM_OF_POSSIBLE_DIRECTION;
-//                    int index2 =
-//                            (i + modifier + 1) %
-//                                    PathFinder.NUM_OF_POSSIBLE_DIRECTION;
-                int index1 = i;
-                int index2 = (i+1)%PathFinder.NUM_OF_POSSIBLE_DIRECTION;
+                    int index1 = (i + modifier) %
+                            PathFinder.NUM_OF_POSSIBLE_DIRECTION;
+                    int index2 =
+                            (i + modifier + 1) %
+                                    PathFinder.NUM_OF_POSSIBLE_DIRECTION;
+//                int index1 = i;
+//                int index2 = (i+1)%PathFinder.NUM_OF_POSSIBLE_DIRECTION;
                 int nextX = currentX + PathFinder.DIRECTIONS_DELTA[index1];
                 int nextY = currentY + PathFinder.DIRECTIONS_DELTA[index2];
                 Coordinate coordinate = new Coordinate(nextX, nextY);
 
                 if(!Route.isWithinMap(nextX, nextY)) continue;
-
 //                System.out.printf("%2d %2d\n", nextX, nextY);
-                if(explorationMap[nextY][nextX] == smallestValue){
+                if(explorationMap[nextY][nextX] == smallestValue &&
+                        !route.toAvoid(coordinate)){
                     return new Coordinate(nextX, nextY);
-                } else if (explorationMap[nextY][nextX] != Route.BLOCKED &&
+                } else if (!route.isBlocked(nextX, nextY) &&
                         !addedCoordinates.contains(coordinate)){
                     /**
                      * If coordinate has not been checked, it will be added
@@ -220,17 +193,18 @@ public class ExplorationState implements State {
                      */
 
                     nextPossibleCoordinate.add(coordinate);
+                    /**
+                     * Record checked coordinates
+                     */
+                    addedCoordinates.add(coordinate);
                 }
-                addedCoordinates.add(coordinate);
 
-                /**
-                 * Record checked coordinates
-                 */
+
             }
         }
 
-
-//        System.out.println(nextPossibleCoordinate.size());
+//        printExplorationMap();
+//        System.out.println("SIZE: "+nextPossibleCoordinate.size());
 //        printExplorationMap();
         /**
          * checking the neighbouring coordinates of the next possible

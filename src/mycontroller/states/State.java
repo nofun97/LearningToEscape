@@ -25,7 +25,7 @@ public interface State {
      *
      * @param coordinate the coordinate
      */
-    void addImportantCoordinate(Coordinate coordinate);
+    boolean offerImportantCoordinate(Coordinate coordinate);
 
     void removeCoordinate(Coordinate coordinate);
 

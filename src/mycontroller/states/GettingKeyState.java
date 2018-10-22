@@ -10,24 +10,7 @@ import world.WorldSpatial;
 import java.util.HashSet;
 import java.util.Set;
 
-//public class GettingKeyState implements State {
-//
-//    private ArrayList<Coordinate> keyList;
-//
-//    public GettingKeyState() {
-//        this.keyList = new ArrayList<>();
-//    }
-//
-//    @Override
-//    public Coordinate getNearestCoordinate(Coordinate currentCoordinate) {
-//        return null;
-//    }
-//
-//    @Override
-//    public void addImportantCoordinate(Coordinate coordinate) {
-//        keyList.add(coordinate);
-//    }
-//}
+
 public class GettingKeyState extends CoordinateTrackerStates {
 
     private Set<Coordinate> keyHistory;
@@ -42,13 +25,13 @@ public class GettingKeyState extends CoordinateTrackerStates {
         return getSize() == 0;
     }
 
-    @Override
+    /*@Override
     public void addImportantCoordinate(Coordinate coordinate) {
         if(!keyHistory.contains(coordinate)){
             keyHistory.add(coordinate);
             super.addImportantCoordinate(coordinate);
         }
-    }
+    }*/
 
     @Override
     public Coordinate getCoordinate(Coordinate currentCoordinate,

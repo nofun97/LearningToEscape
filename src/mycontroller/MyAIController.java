@@ -66,6 +66,7 @@ public class MyAIController extends CarController{
          */
 //        System.out.println(getPosition());
         updateMap();
+//        route.printGridMap();
         Coordinate currentCoordinate = getCurrentCoordinate();
 
 
@@ -80,7 +81,7 @@ public class MyAIController extends CarController{
          * Creating a command sequence to go to a certain point
          */
 //        if (commandsQueue.isEmpty() && !calculated)
-        if (commandsQueue.isEmpty()){
+        if ( commandsQueue.isEmpty()){
 
             /**
              * Generate the next coordinate the car should go through
@@ -89,24 +90,26 @@ public class MyAIController extends CarController{
                     strategy.decideNextCoordinate(currentCoordinate);
 
 
-
             System.out.println(destination.toString());
+//            System.out.println("Here is the desination: "+destination.toString());
             /**
              * Generate a list of coordinates that the car has to go through
              * using certain path finding calculation
              */
             List<Coordinate> path =
                     pathFinder.findBestPath
-                            (currentCoordinate, destination, getOrientation());
+                            (currentCoordinate, destination, getOrientation(),
+                                    strategy.avoidTrap());
 
             while(path == PathFinder.UNREACHABLE){
                 route.blockFromSource(destination.x, destination.y);
                 destination =  strategy.decideNextCoordinate(currentCoordinate);
 
-                System.out.println(destination.toString());
+//                System.out.println("HERE");
 
                 path = pathFinder.findBestPath
-                        (currentCoordinate, destination, getOrientation());
+                        (currentCoordinate, destination, getOrientation(),
+                                strategy.avoidTrap());
             }
             pathQueue = new LinkedList<>(path);
             pathQueue.poll();
@@ -377,6 +380,9 @@ public class MyAIController extends CarController{
 
             if(newTile.isType(MapTile.Type.TRAP) && newTile instanceof MudTrap){
                 route.blockCoordinate(coord.x, coord.y);
+            } else if (newTile.isType(MapTile.Type.TRAP) &&
+                    newTile instanceof LavaTrap){
+                route.setToAvoid(coord.x, coord.y);
             } else {
                 route.updateMap(coord);
             }
@@ -501,13 +507,6 @@ public class MyAIController extends CarController{
 
     }
 
-
-
-
-	public void findBestPath(Coordinate nextDestination){
-
-
-	}
 
     /**
      * Converting position from string into a coordinate

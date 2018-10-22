@@ -20,6 +20,7 @@ public class Route {
     private static final String HEALTH = "health";
     public static final int BLOCKED = -1;
     public static final int TRAP_OR_ROAD = 0;
+    public static final int TO_AVOID = -2;
     public static final int LEFT = 1;
     public static final int RIGHT = 2;
 
@@ -113,7 +114,7 @@ public class Route {
         blockFromSource(possibleCoordinate);
     }
 
-    public void blockFromSource(ArrayList<Coordinate> possibleCoordinates){
+    private void blockFromSource(ArrayList<Coordinate> possibleCoordinates){
         if(possibleCoordinates.isEmpty()) return;
         ArrayList<Coordinate> nextPossibleCoordinates = new ArrayList<>();
         for (Coordinate possibleCoordinate: possibleCoordinates) {
@@ -138,23 +139,20 @@ public class Route {
 //        this.buildMap();
         int x = coordinate.x;
         int y = coordinate.y;
-        if(!isWithinMap(x, y) || gridMap[y][x] == BLOCKED){
+        if(!isWithinMap(x, y) || gridMap[y][x] == BLOCKED ||
+                gridMap[y][x] == TO_AVOID){
             return;
         }
         // then set the gridMap's value into given value (which is 0 in this case)
         gridMap[y][x] += 1;
     }
 
-    public boolean nextToAWall(Coordinate coordinate){
-        for (int i = 0; i < PathFinder.NUM_OF_POSSIBLE_DIRECTION; i++) {
-            int nextX = coordinate.x + PathFinder.DIRECTIONS_DELTA[i];
-            int nextY = coordinate.y + PathFinder.DIRECTIONS_DELTA
-                    [(i+1)%PathFinder.NUM_OF_POSSIBLE_DIRECTION];
+    public void setToAvoid(int x, int y){
+        if(isWithinMap(x, y)) gridMap[y][x] = TO_AVOID;
+    }
 
-            if(isWithinMap(nextX, nextY) && isBlocked(nextX, nextY))
-                return true;
-        }
-        return false;
+    public boolean toAvoid(Coordinate coordinate){
+        return gridMap[coordinate.y][coordinate.x] == TO_AVOID;
     }
 
     // check if there is a wall on which side.

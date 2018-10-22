@@ -2,7 +2,6 @@ package mycontroller.strategies;
 
 import utilities.Coordinate;
 
-import java.util.ArrayList;
 
 
 /**
@@ -19,6 +18,10 @@ public interface StrategyFactory {
      * @param currentCoordinate
      */
     Coordinate decideNextCoordinate(Coordinate currentCoordinate);
+
+    boolean avoidTrap();
+
+    boolean interrupt();
 
     void updateData(Coordinate coordinate, IMPORTANT_DATA type);
 }
