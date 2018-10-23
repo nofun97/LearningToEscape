@@ -35,7 +35,6 @@ public class KeyPriorityStrategy implements StrategyFactory {
          */
         State currentState = null;
         avoidTrap = false;
-//        route.printGridMap();
         /**
          * Keep healing until heal state is finished
          */
@@ -46,7 +45,7 @@ public class KeyPriorityStrategy implements StrategyFactory {
           }
         } else if(!healCommences &&
                 car.getHealth() <= MINIMUM_HEALTH && heal.isCoordinateExist()){
-            System.out.println("HEAL");
+            avoidTrap = true;
             /**
              * Heal when car is low on health and a heal tile exists
              */
@@ -54,7 +53,6 @@ public class KeyPriorityStrategy implements StrategyFactory {
             healCommences = true;
         } else if(car.getKeys().size() == car.numKeys &&
                 exit.isCoordinateExist()){
-            System.out.println("FREEDOM");
             /**
              * Exit when all the keys are found and an exit tile exists
              */
@@ -62,13 +60,11 @@ public class KeyPriorityStrategy implements StrategyFactory {
         }  else if ((!heal.isCoordinateExist() ||
                 car.getHealth() > MINIMUM_HEALTH) &&
                 getKey.isCoordinateExist()){
-            System.out.println("WHY EVEN BOTHER");
             /**
              * Only get key when the car's health is above certain threshold
              */
             currentState = getKey;
         } else if (!healCommences){
-            System.out.println("DORA THE EXPLORER");
             /**
              * If it is not healing, it must explore
              */
@@ -76,16 +72,12 @@ public class KeyPriorityStrategy implements StrategyFactory {
             currentState = explore;
         }
 
-//        route.printGridMap();
-
         /**
          * Based on the states, the next coordinate is determined
          */
         Coordinate nextCoordinate =
                 currentState.getCoordinate(currentCoordinate,
                         car.getOrientation());
-
-//        System.out.println("Destination: "+nextCoordinate.toString());
 
         /**
          * If there is no nextCoordinate, the process is repeated

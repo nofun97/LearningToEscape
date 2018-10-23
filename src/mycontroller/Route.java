@@ -42,8 +42,6 @@ public class Route {
     public Route(HashMap<Coordinate, MapTile> map) {
         this.map = map;
         buildMap();
-        System.out.println("INITIAL GRID MAP");
-//        printGridMap();
     }
 
     /**
@@ -89,7 +87,6 @@ public class Route {
      * @param y the y coordinate
      */
     public void blockCoordinate(int x, int y){
-//        System.out.printf("Block: %2d,%2d\n", x, y);
         gridMap[y][x] = Route.BLOCKED;
     }
 

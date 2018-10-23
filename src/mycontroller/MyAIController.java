@@ -121,11 +121,6 @@ public class MyAIController extends CarController{
                         (currentCoordinate, destination, getOrientation(),
                                 strategy.avoidTrap());
             }
-            /*System.out.println(getOrientation());
-            System.out.println("PATH");
-            for(Coordinate a: path){
-                System.out.println(a.toString());
-            }*/
 
             /**
              * Coordinates queue for checkOncomingCollision
@@ -139,9 +134,6 @@ public class MyAIController extends CarController{
              * condition
              */
             setCommandSequence(path);
-            /*for(Commands command: commandsQueue){
-                System.out.println(command.toString());
-            }*/
 		}
 
 
@@ -179,16 +171,9 @@ public class MyAIController extends CarController{
      */
     private void checkOncomingCollision(){
 	    Coordinate nextPath = pathQueue.poll();
-	    /*if(nextPath!=null){
-
-            System.out.printf("%2d,%2d is %s\n", nextPath.x, nextPath.y,
-                    route.isBlocked(nextPath.x, nextPath.y) ? "Blocked" :
-                            "Not Blocked");
-        }*/
 	    if (nextPath != null && route.isBlocked(nextPath.x, nextPath.y)){
 	        commandsQueue = new LinkedList<>();
 	        applyBrake();
-//	        System.out.println("THIS THING IS USEFUL");
         }
     }
 

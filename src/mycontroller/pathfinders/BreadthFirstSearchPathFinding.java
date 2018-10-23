@@ -91,8 +91,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
             manipulateArray(initialPossibleCoordinates, destination);
         }
-
-//        printDistArray();
         /**
          * returning the processed path
          */
@@ -117,6 +115,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          * initial values
          */
         int minimumDistance = Integer.MAX_VALUE;
+        avoidTrap = false;
         List<Coordinate> initialPossibleCoordinates =
                 calculateInitialPossibleCoordinate
                         (currentCoordinate, orientation);
@@ -125,9 +124,9 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          * Calculates distances to every coordinates from source, turning off
          * the avoid trap
          */
-        avoidTrap = false;
         manipulateArray(initialPossibleCoordinates, PROCESS_EVERYTHING);
         avoidTrap = true;
+//        printDistArray();
 
         /**
          * Finding the coordinate with the smallest distance
@@ -147,7 +146,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                  * calculated again
                  */
                 unreachableCoordinates.add(coordinate);
-                System.out.println("To Remove: " + coordinate.toString());
                 route.blockCoordinate(x, y);
             } else if(minimumDistance > distanceArray[y][x]){
 
@@ -228,10 +226,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
                 distanceArray[possibleY][possibleX1] = DISTANCE;
 
-                if(route.toAvoid(new Coordinate
-                        (possibleX1, possibleY)))
-                    distanceArray[possibleY][possibleX1] += DISTANCE;
-
                 initialPossibleCoordinates.add(
                         new Coordinate(possibleX1, possibleY));
             }
@@ -242,10 +236,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                             (possibleX2, possibleY)))) {
 
                 distanceArray[possibleY][possibleX2] = DISTANCE;
-
-                if(route.toAvoid(new Coordinate
-                        (possibleX1, possibleY)))
-                    distanceArray[possibleY][possibleX2]+= DISTANCE;
 
                 initialPossibleCoordinates.add(
                         new Coordinate(possibleX2, possibleY));
@@ -264,10 +254,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
                 distanceArray[possibleY1][possibleX] = DISTANCE;
 
-                if(route.toAvoid(new Coordinate
-                        (possibleX, possibleY1)))
-                    distanceArray[possibleY1][possibleX]+= DISTANCE;
-
                 initialPossibleCoordinates.add(
                         new Coordinate(possibleX, possibleY1));
             }
@@ -279,9 +265,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
                 distanceArray[possibleY2][possibleX] = DISTANCE;
 
-                if(route.toAvoid(new Coordinate
-                        (possibleX, possibleY1)))
-                    distanceArray[possibleY2][possibleX] += DISTANCE;
 
                 initialPossibleCoordinates.add(
                         new Coordinate(possibleX, possibleY2));
@@ -358,9 +341,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                     distanceArray[nextY][nextX] =
                             distanceArray[sourceY][sourceX] + DISTANCE;
 
-                    if(route.toAvoid(new Coordinate
-                            (nextX, nextY)))
-                        distanceArray[nextY][nextX]+= DISTANCE;
 
                     nextPossibleCoordinates.add(new Coordinate(nextX, nextY));
 
@@ -375,7 +355,6 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
             }
         }
 
-//        printDistArray();
         /**
          * Recursively update the distance of every coordinate from the source
          * until it reaches the destination or if there is no more values to
