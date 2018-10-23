@@ -226,6 +226,10 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
                 distanceArray[possibleY][possibleX1] = DISTANCE;
 
+                /*if(route.toAvoid(new Coordinate
+                        (possibleX1, possibleY)))
+                    distanceArray[possibleY][possibleX1] += DISTANCE;*/
+
                 initialPossibleCoordinates.add(
                         new Coordinate(possibleX1, possibleY));
             }
@@ -236,6 +240,10 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                             (possibleX2, possibleY)))) {
 
                 distanceArray[possibleY][possibleX2] = DISTANCE;
+
+                /*if(route.toAvoid(new Coordinate
+                        (possibleX1, possibleY)))
+                    distanceArray[possibleY][possibleX2]+= DISTANCE;*/
 
                 initialPossibleCoordinates.add(
                         new Coordinate(possibleX2, possibleY));
@@ -254,6 +262,10 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
                 distanceArray[possibleY1][possibleX] = DISTANCE;
 
+                /*if(route.toAvoid(new Coordinate
+                        (possibleX, possibleY1)))
+                    distanceArray[possibleY1][possibleX]+= DISTANCE;*/
+
                 initialPossibleCoordinates.add(
                         new Coordinate(possibleX, possibleY1));
             }
@@ -265,6 +277,9 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
                 distanceArray[possibleY2][possibleX] = DISTANCE;
 
+                /*if(route.toAvoid(new Coordinate
+                        (possibleX, possibleY1)))
+                    distanceArray[possibleY2][possibleX] += DISTANCE;*/
 
                 initialPossibleCoordinates.add(
                         new Coordinate(possibleX, possibleY2));
@@ -341,6 +356,13 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                     distanceArray[nextY][nextX] =
                             distanceArray[sourceY][sourceX] + DISTANCE;
 
+                    /**
+                     * If route is to avoid, it is translated as further so
+                     * that it is avoided as much as possible
+                     */
+                    if(route.toAvoid(new Coordinate
+                            (nextX, nextY)))
+                        distanceArray[nextY][nextX]+= DISTANCE;
 
                     nextPossibleCoordinates.add(new Coordinate(nextX, nextY));
 
@@ -417,7 +439,8 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                  * Should the value of the current coordinate be higher than
                  * the neighouring values, the path is added. As the
                  * difference of values is, at maximum, to be 1, any path
-                 * chosen will be fine.
+                 * chosen will be fine. With the TO_AVOID blocks having more
+                 * points, at most its difference is 2 * DISTANCE
                  */
                 if(distanceArray[currentY][currentX] -
                         distanceArray[nextY][nextX] == DISTANCE ||
