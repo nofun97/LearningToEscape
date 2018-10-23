@@ -42,6 +42,8 @@ public class Route {
     public Route(HashMap<Coordinate, MapTile> map) {
         this.map = map;
         buildMap();
+        System.out.println("INITIAL GRID MAP");
+//        printGridMap();
     }
 
     /**
@@ -87,6 +89,7 @@ public class Route {
      * @param y the y coordinate
      */
     public void blockCoordinate(int x, int y){
+//        System.out.printf("Block: %2d,%2d\n", x, y);
         gridMap[y][x] = Route.BLOCKED;
     }
 
@@ -115,6 +118,7 @@ public class Route {
         for (Coordinate possibleCoordinate: possibleCoordinates) {
             int sourceX = possibleCoordinate.x;
             int sourceY = possibleCoordinate.y;
+            System.out.printf("BlockFromSource: %2d,%2d", sourceX, sourceY);
             for (int i = 0; i < PathFinder.NUM_OF_POSSIBLE_DIRECTION; i++) {
                 int nextX = sourceX + PathFinder.DIRECTIONS_DELTA[i];
                 int nextY = sourceY + PathFinder.DIRECTIONS_DELTA

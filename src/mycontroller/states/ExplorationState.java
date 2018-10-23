@@ -161,6 +161,7 @@ public class ExplorationState implements State {
         Set<Coordinate> nextPossibleCoordinate = new LinkedHashSet<>();
 
 
+        if(possibleCoordinate.isEmpty()) return null;
 
         /**
          * Iterate through the possible coordinates and adding the next

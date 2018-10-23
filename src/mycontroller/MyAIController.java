@@ -114,18 +114,24 @@ public class MyAIController extends CarController{
              * and the path is recalculated until a reachable path is found
              */
             while(path == PathFinder.UNREACHABLE){
-                route.blockFromSource(destination.x, destination.y);
+                route.blockCoordinate(destination.x, destination.y);
                 destination =  strategy.decideNextCoordinate(currentCoordinate);
 
                 path = pathFinder.findBestPath
                         (currentCoordinate, destination, getOrientation(),
                                 strategy.avoidTrap());
             }
+            /*System.out.println(getOrientation());
+            System.out.println("PATH");
+            for(Coordinate a: path){
+                System.out.println(a.toString());
+            }*/
 
             /**
              * Coordinates queue for checkOncomingCollision
              */
             pathQueue = new LinkedList<>(path);
+            pathQueue.poll();
             pathQueue.poll();
 
             /**
@@ -133,7 +139,9 @@ public class MyAIController extends CarController{
              * condition
              */
             setCommandSequence(path);
-
+            /*for(Commands command: commandsQueue){
+                System.out.println(command.toString());
+            }*/
 		}
 
 
@@ -171,9 +179,16 @@ public class MyAIController extends CarController{
      */
     private void checkOncomingCollision(){
 	    Coordinate nextPath = pathQueue.poll();
+	    /*if(nextPath!=null){
+
+            System.out.printf("%2d,%2d is %s\n", nextPath.x, nextPath.y,
+                    route.isBlocked(nextPath.x, nextPath.y) ? "Blocked" :
+                            "Not Blocked");
+        }*/
 	    if (nextPath != null && route.isBlocked(nextPath.x, nextPath.y)){
 	        commandsQueue = new LinkedList<>();
-	        commandsQueue.add(Commands.BRAKE);
+	        applyBrake();
+//	        System.out.println("THIS THING IS USEFUL");
         }
     }
 
@@ -219,7 +234,7 @@ public class MyAIController extends CarController{
 
             /**
              * Changing the next coordinate and the current coordinate into
-             * acceptable values of direaction
+             * acceptable values of direction
              */
 			int deltaX = coordinate.x - currentCoordinate.x;
 			int deltaY = coordinate.y - currentCoordinate.y;
