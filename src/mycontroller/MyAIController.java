@@ -166,7 +166,7 @@ public class MyAIController extends CarController{
      * Check the next coordinate where the car will head to and it will stop
      * should it be a trap that kills or a wall
      */
-    public void checkOncomingCollision(){
+    private void checkOncomingCollision(){
 	    Coordinate nextPath = pathQueue.poll();
 	    if (nextPath != null && route.isBlocked(nextPath.x, nextPath.y)){
 	        commandsQueue = new LinkedList<>();
@@ -182,7 +182,7 @@ public class MyAIController extends CarController{
      *
      * @param coordinates the list of coordinates
      */
-    public void setCommandSequence(List<Coordinate> coordinates){
+    private void setCommandSequence(List<Coordinate> coordinates){
         /**
          * Get current coordinates and current orientation
          */
@@ -430,13 +430,13 @@ public class MyAIController extends CarController{
             if(newTile.isType(MapTile.Type.TRAP)
                     && newTile instanceof LavaTrap
                     && ((LavaTrap) newTile).getKey() > 0){
-                strategy.updateData(coord, StrategyFactory.importantData.KEY);
+                strategy.updateData(coord, StrategyFactory.ImportantData.KEY);
             } else if (newTile.isType(MapTile.Type.TRAP) &&
                     newTile instanceof HealthTrap){
                 strategy.updateData
-                        (coord, StrategyFactory.importantData.HEALING);
+                        (coord, StrategyFactory.ImportantData.HEALING);
             } else if (newTile.isType(MapTile.Type.FINISH)){
-                strategy.updateData(coord, StrategyFactory.importantData.EXIT);
+                strategy.updateData(coord, StrategyFactory.ImportantData.EXIT);
             }
 
             /**

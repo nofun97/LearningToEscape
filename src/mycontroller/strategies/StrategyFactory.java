@@ -16,7 +16,7 @@ public interface StrategyFactory {
     /**
      * The enum Important data.
      */
-    enum importantData {
+    enum ImportantData {
         /**
          * Key important data.
          */
@@ -58,5 +58,5 @@ public interface StrategyFactory {
      * @param coordinate the coordinate
      * @param type       the type
      */
-    void updateData(Coordinate coordinate, importantData type);
+    void updateData(Coordinate coordinate, ImportantData type);
 }

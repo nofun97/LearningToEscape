@@ -95,7 +95,7 @@ public class KeyPriorityStrategy implements StrategyFactory {
     }
 
     @Override
-    public void updateData(Coordinate coordinate, importantData type) {
+    public void updateData(Coordinate coordinate, ImportantData type) {
 
         /**
          * Adding the data to certain states based on the type
@@ -115,7 +115,7 @@ public class KeyPriorityStrategy implements StrategyFactory {
         assert trackerStates != null;
         boolean accepted = trackerStates.offerImportantCoordinate(coordinate);
 
-        interrupt = accepted && type == importantData.KEY;
+        interrupt = accepted && type == ImportantData.KEY;
     }
 
     @Override
