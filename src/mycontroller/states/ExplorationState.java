@@ -157,6 +157,8 @@ public class ExplorationState implements State {
                                                         addedCoordinates){
         Set<Coordinate> nextPossibleCoordinate = new LinkedHashSet<>();
 
+
+
         /**
          * Iterate through the possible coordinates and adding the next
          * possible coordinates
@@ -212,6 +214,7 @@ public class ExplorationState implements State {
 
             }
         }
+
         /**
          * checking the neighbouring coordinates of the next possible
          * coordinates
