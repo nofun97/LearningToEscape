@@ -53,24 +53,29 @@ public class KeyPriorityStrategy implements StrategyFactory {
             healCommences = true;
         } else if(car.getKeys().size() == car.numKeys &&
                 exit.isCoordinateExist()){
+            ;
             /**
              * Exit when all the keys are found and an exit tile exists
              */
             currentState = exit;
-        }  else if ((!heal.isCoordinateExist() ||
+        }else if ((!heal.isCoordinateExist() ||
                 car.getHealth() > MINIMUM_HEALTH) &&
+                (!(car.getHealth() < MINIMUM_HEALTH) || explore.isFinished())&&
                 getKey.isCoordinateExist()){
             /**
              * Only get key when the car's health is above certain threshold
              */
             currentState = getKey;
-        } else if (!healCommences){
+        }
+        else if (!healCommences && !explore.isFinished()){
             /**
              * If it is not healing, it must explore
              */
             avoidTrap = true;
             currentState = explore;
         }
+
+
 
         /**
          * Based on the states, the next coordinate is determined

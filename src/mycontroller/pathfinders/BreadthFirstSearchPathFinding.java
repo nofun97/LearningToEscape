@@ -16,6 +16,42 @@ import java.util.List;
  * The PathFinder that uses the Breadth First Search Algorithm.
  */
 public class BreadthFirstSearchPathFinding implements PathFinder{
+
+    private class Node{
+        private int distance;
+        private Node visitor = null;
+        private int damageDealt;
+        private int x, y;
+
+        public Node(int x, int y) {
+            this.x = x;
+            this.y = y;
+            this.distance = NOT_REACHED;
+            this.damageDealt = NOT_REACHED;
+        }
+
+        public void setDistance(int distance){
+            if(this.distance < distance) this.distance = distance;
+        }
+
+        public boolean offerData(int distance, int damageDealt, Node visitor){
+            if((damageDealt < this.damageDealt) ||
+                    (damageDealt == this.damageDealt &&
+                            distance < this.distance)) {
+                this.visitor = visitor;
+                this.distance = distance;
+                this.damageDealt = damageDealt;
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return x+","+y;
+        }
+    }
+
     /**
      * Dummy values, to be put in manipulateArray so that it process the
      * distance to every coordinates
@@ -31,7 +67,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
     /**
      * distanceArray is used to execute the algorithm
      */
-    private int[][] distanceArray;
+    private Node[][] distanceArray;
 
     private Route route;
 
@@ -46,7 +82,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
      * @param route the route
      */
     public BreadthFirstSearchPathFinding(Route route) {
-        distanceArray = new int[World.MAP_HEIGHT][World.MAP_WIDTH];
+        distanceArray = new Node[World.MAP_HEIGHT][World.MAP_WIDTH];
         this.route = route;
     }
 
@@ -56,7 +92,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                                          WorldSpatial.Direction orientation,
                                          boolean avoidTrap) {
         resetDistanceArray(currentCoordinate);
-        this.avoidTrap = avoidTrap;
+        this.avoidTrap = false;
         /**
          * Based on the orientation of the car, defines where the next possible
          * coordinates. A car must move one coordinate forward or backward at
@@ -70,27 +106,29 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
         /**
          * Manipulating distArray based on avoidTrap
          */
-        if(avoidTrap){
-            manipulateArray(initialPossibleCoordinates, destination);
+//        if(avoidTrap){
+//            manipulateArray(initialPossibleCoordinates, destination);
+//
+//            /**
+//             * Should the coordinate, after processing, is found as unreachable,
+//             * it recalculates everything again with the exception of being
+//             * able to go through the trap. This happens when the only way to
+//             * get to the destination is through the trap.
+//             */
+//            if(!isReachable(destination)) {
+//                this.avoidTrap = false;
+//                resetDistanceArray(currentCoordinate);
+//                initialPossibleCoordinates = calculateInitialPossibleCoordinate
+//                        (currentCoordinate, orientation);
+//                manipulateArray(initialPossibleCoordinates, destination);
+//            }
+//
+//        } else {
+//
+//            manipulateArray(initialPossibleCoordinates, destination);
+//        }
 
-            /**
-             * Should the coordinate, after processing, is found as unreachable,
-             * it recalculates everything again with the exception of being
-             * able to go through the trap. This happens when the only way to
-             * get to the destination is through the trap.
-             */
-            if(!isReachable(destination)) {
-                this.avoidTrap = false;
-                resetDistanceArray(currentCoordinate);
-                initialPossibleCoordinates = calculateInitialPossibleCoordinate
-                        (currentCoordinate, orientation);
-                manipulateArray(initialPossibleCoordinates, destination);
-            }
-
-        } else {
-
-            manipulateArray(initialPossibleCoordinates, destination);
-        }
+        manipulateArray(initialPossibleCoordinates,destination);
         /**
          * returning the processed path
          */
@@ -147,12 +185,12 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                  */
                 unreachableCoordinates.add(coordinate);
                 route.blockCoordinate(x, y);
-            } else if(minimumDistance > distanceArray[y][x]){
+            } else if(minimumDistance > distanceArray[y][x].distance){
 
                 /**
                  * Updating the nearest coordinates
                  */
-                minimumDistance = distanceArray[y][x];
+                minimumDistance = distanceArray[y][x].distance;
                 nearestCoordinate = coordinate;
             }
         }
@@ -173,7 +211,8 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          * If after manipulationArray, the coordinate's distance value is not
          * updated, then it is unreachable
          */
-        return distanceArray[destination.y][destination.x] != NOT_REACHED;
+        return distanceArray[destination.y][destination.x].distance
+                != NOT_REACHED;
     }
 
     /**
@@ -186,11 +225,12 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          */
         for (int i = 0; i < World.MAP_HEIGHT; i++) {
             for (int j = 0; j < World.MAP_WIDTH; j++) {
-                distanceArray[i][j] = NOT_REACHED;
+                distanceArray[i][j] = new Node(j, i);
             }
         }
 
-        distanceArray[currentCoordinate.y][currentCoordinate.x] = 0;
+        distanceArray[currentCoordinate.y][currentCoordinate.x].distance = 0;
+        distanceArray[currentCoordinate.y][currentCoordinate.x].damageDealt = 0;
     }
 
     /**
@@ -224,11 +264,10 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                     (!avoidTrap || !route.toAvoid(new Coordinate
                             (possibleX1, possibleY)))) {
 
-                distanceArray[possibleY][possibleX1] = DISTANCE;
-
-                /*if(route.toAvoid(new Coordinate
-                        (possibleX1, possibleY)))
-                    distanceArray[possibleY][possibleX1] += DISTANCE;*/
+                distanceArray[possibleY][possibleX1].distance = DISTANCE;
+                distanceArray[possibleY][possibleX1].damageDealt = 0;
+                if(route.toAvoid(new Coordinate(possibleX1, possibleY)))
+                    distanceArray[possibleY][possibleX1].damageDealt = DAMAGE;
 
                 initialPossibleCoordinates.add(
                         new Coordinate(possibleX1, possibleY));
@@ -239,11 +278,10 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                     (!avoidTrap || !route.toAvoid(new Coordinate
                             (possibleX2, possibleY)))) {
 
-                distanceArray[possibleY][possibleX2] = DISTANCE;
-
-                /*if(route.toAvoid(new Coordinate
-                        (possibleX1, possibleY)))
-                    distanceArray[possibleY][possibleX2]+= DISTANCE;*/
+                distanceArray[possibleY][possibleX2].distance = DISTANCE;
+                distanceArray[possibleY][possibleX2].damageDealt = 0;
+                if(route.toAvoid(new Coordinate(possibleX2, possibleY)))
+                    distanceArray[possibleY][possibleX2].damageDealt = DAMAGE;
 
                 initialPossibleCoordinates.add(
                         new Coordinate(possibleX2, possibleY));
@@ -260,11 +298,10 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                     (!avoidTrap || !route.toAvoid(new Coordinate
                             (possibleX, possibleY1)))) {
 
-                distanceArray[possibleY1][possibleX] = DISTANCE;
-
-                /*if(route.toAvoid(new Coordinate
-                        (possibleX, possibleY1)))
-                    distanceArray[possibleY1][possibleX]+= DISTANCE;*/
+                distanceArray[possibleY1][possibleX].distance = DISTANCE;
+                distanceArray[possibleY1][possibleX].damageDealt = 0;
+                if(route.toAvoid(new Coordinate(possibleX, possibleY1)))
+                    distanceArray[possibleY1][possibleX].damageDealt = DAMAGE;
 
                 initialPossibleCoordinates.add(
                         new Coordinate(possibleX, possibleY1));
@@ -275,11 +312,10 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                     (!avoidTrap || !route.toAvoid(new Coordinate
                             (possibleX, possibleY2)))) {
 
-                distanceArray[possibleY2][possibleX] = DISTANCE;
-
-                /*if(route.toAvoid(new Coordinate
-                        (possibleX, possibleY1)))
-                    distanceArray[possibleY2][possibleX] += DISTANCE;*/
+                distanceArray[possibleY2][possibleX].distance = DISTANCE;
+                distanceArray[possibleY2][possibleX].damageDealt = 0;
+                if(route.toAvoid(new Coordinate(possibleX, possibleY2)))
+                    distanceArray[possibleY2][possibleX].damageDealt = DAMAGE;
 
                 initialPossibleCoordinates.add(
                         new Coordinate(possibleX, possibleY2));
@@ -300,7 +336,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
     private void manipulateArray(List<Coordinate> possibleCoordinates,
                                  Coordinate destination){
         boolean reachedDestination = false;
-
+//        printDistArray();
         /**
          * When there is no more possible coordinates to update, it finishes
          */
@@ -322,6 +358,9 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
             int sourceX = coordinate.x;
             int sourceY = coordinate.y;
 
+            int newDistance = distanceArray[sourceY][sourceX].distance
+                    + DISTANCE;
+            Node newVisitor = distanceArray[sourceY][sourceX];
             /**
              * Update the surrounding values should it fulfill the conditions
              */
@@ -337,10 +376,16 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                 /**
                  * Ignoring invalid values
                  */
-                if(!Route.isWithinMap(nextX, nextY)){
+                if(!Route.isWithinMap(nextX, nextY))continue;
 
-                    continue;
+                int newDamage = distanceArray[sourceY][sourceX].damageDealt;
+                Coordinate neighbour = new Coordinate(nextX, nextY);
+                if(route.toAvoid(neighbour)){
+                    newDamage += DAMAGE;
                 }
+
+
+
 
                 /**
                  * Update the distance values should it be faster, not a
@@ -348,33 +393,21 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
                  */
 
                 if(!route.isBlocked(nextX, nextY) &&
-                        distanceArray[sourceY][sourceX] + DISTANCE <
-                                distanceArray[nextY][nextX] &&
-                        (!avoidTrap || !route.toAvoid(new Coordinate(nextX
-                                , nextY)))){
+                        (!avoidTrap || !route.toAvoid(neighbour)) &&
+                        distanceArray[nextY][nextX].offerData(newDistance,
+                                newDamage, newVisitor)){
 
-                    distanceArray[nextY][nextX] =
-                            distanceArray[sourceY][sourceX] + DISTANCE;
-
-                    /**
-                     * If route is to avoid, it is translated as further so
-                     * that it is avoided as much as possible
-                     */
-                    if(route.toAvoid(new Coordinate
-                            (nextX, nextY)))
-                        distanceArray[nextY][nextX]+= DISTANCE;
-
-                    nextPossibleCoordinates.add(new Coordinate(nextX, nextY));
+                    nextPossibleCoordinates.add(neighbour);
 
                 }
             }
             /**
              * Reaching a destination means that the algorithm should stop
              */
-            if(sourceX == destination.x && sourceY == destination.y){
+            /*if(sourceX == destination.x && sourceY == destination.y){
                 reachedDestination = true;
                 break;
-            }
+            }*/
         }
 
         /**
@@ -400,8 +433,7 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
         /**
          * Start to track the path from the destination
          */
-        int currentX = destination.x;
-        int currentY = destination.y;
+        Node currentNode = distanceArray[destination.y][destination.x];
 
         List<Coordinate> path = new ArrayList<>();
 
@@ -414,49 +446,13 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
          * Backtracking from the destination, keep finding the path until the
          * source coordinate is reached
          */
-        while(currentX != startingCoordinate.x ||
-                currentY != startingCoordinate.y){
+        while(currentNode != null){
             /**
              * Checking the surroundings
              */
-            for (int i = 0; i < NUM_OF_POSSIBLE_DIRECTION; i++) {
-
-                /**
-                 * One of the surroundings
-                 */
-                int nextX = currentX + DIRECTIONS_DELTA[i];
-                int nextY = currentY +
-                        DIRECTIONS_DELTA[(i+1)%NUM_OF_POSSIBLE_DIRECTION];
-
-                /**
-                 * Ignoring invalid values
-                 */
-                if(nextX < 0 || nextX >= World.MAP_WIDTH || nextY < 0
-                        || nextY >= World.MAP_HEIGHT){
-                    continue;
-                }
-                /**
-                 * Should the value of the current coordinate be higher than
-                 * the neighouring values, the path is added. As the
-                 * difference of values is, at maximum, to be 1, any path
-                 * chosen will be fine. With the TO_AVOID blocks having more
-                 * points, at most its difference is 2 * DISTANCE
-                 */
-                if(distanceArray[currentY][currentX] -
-                        distanceArray[nextY][nextX] == DISTANCE ||
-                        distanceArray[currentY][currentX] -
-                                distanceArray[nextY][nextX] == 2 * DISTANCE ){
-                    path.add(new Coordinate(nextX, nextY));
-                    /**
-                     * Change the currently processed coordinate
-                     */
-                    currentX = nextX;
-                    currentY = nextY;
-
-                    break;
-                }
-            }
-
+            currentNode = currentNode.visitor;
+            if(currentNode == null) break;
+            path.add(new Coordinate(currentNode.x, currentNode.y));
         }
 
         /**
@@ -468,13 +464,12 @@ public class BreadthFirstSearchPathFinding implements PathFinder{
 
     private void printDistArray(){
         for (int i = World.MAP_HEIGHT - 1; i >= 0; i--) {
-            int[] x = distanceArray[i];
-            for (int y :
-                    x) {
-                if (y == Integer.MAX_VALUE){
+            Node[] x = distanceArray[i];
+            for (Node y :x) {
+                if (y.distance == Integer.MAX_VALUE){
                     System.out.print("-- ");
                 } else{
-                    System.out.printf("%2d ", y);
+                    System.out.printf("%2d ", y.damageDealt);
                 }
             }
             System.out.printf("\n");

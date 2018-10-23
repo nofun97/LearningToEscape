@@ -18,6 +18,7 @@ public interface PathFinder {
      */
     int DISTANCE = 1;
 
+    int DAMAGE = 1;
     /**
      * The constant NUM_OF_POSSIBLE_DIRECTION, a car can only go to one of
      * the four directions from a coordinate.
