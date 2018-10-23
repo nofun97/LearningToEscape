@@ -1,3 +1,6 @@
+/**
+ * Group 23
+ */
 package mycontroller.strategies;
 
 import utilities.Coordinate;

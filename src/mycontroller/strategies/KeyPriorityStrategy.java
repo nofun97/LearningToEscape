@@ -1,9 +1,11 @@
+/**
+ * Group 23
+ */
 package mycontroller.strategies;
 
 import mycontroller.Route;
 import mycontroller.pathfinders.PathFinder;
 import mycontroller.states.*;
-import org.lwjgl.Sys;
 import utilities.Coordinate;
 import world.Car;
 
